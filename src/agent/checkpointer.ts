@@ -159,3 +159,47 @@ export function cleanupOldSessions(maxAgeMs: number = 24 * 60 * 60 * 1000): numb
 export function getAllSessions(): SessionData[] {
   return Array.from(sessionStore.values());
 }
+
+// Get session list with summary (for UI)
+export function getSessionList(): Array<{
+  sessionId: string;
+  createdAt: Date;
+  lastActiveAt: Date;
+  messageCount: number;
+  preview: string;
+  domain: 'person' | 'company';
+}> {
+  const sessions = Array.from(sessionStore.values());
+  
+  return sessions
+    .map(session => {
+      // Get first user message as preview
+      const firstUserMessage = session.messages.find(m => m.role === 'user');
+      const preview = firstUserMessage?.content.substring(0, 50) || 'New conversation';
+      
+      return {
+        sessionId: session.sessionId,
+        createdAt: session.createdAt,
+        lastActiveAt: session.lastActiveAt,
+        messageCount: session.messages.length,
+        preview: preview + (firstUserMessage && firstUserMessage.content.length > 50 ? '...' : ''),
+        domain: session.meta.domain,
+      };
+    })
+    .sort((a, b) => b.lastActiveAt.getTime() - a.lastActiveAt.getTime());
+}
+
+// Delete a specific session
+export function deleteSession(sessionId: string): boolean {
+  return sessionStore.delete(sessionId);
+}
+
+// Rename/update session title (first message as title)
+export function getSessionTitle(sessionId: string): string {
+  const session = sessionStore.get(sessionId);
+  if (!session) return 'Unknown';
+  
+  const firstUserMessage = session.messages.find(m => m.role === 'user');
+  return firstUserMessage?.content.substring(0, 50) || 'New conversation';
+}
+

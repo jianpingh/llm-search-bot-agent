@@ -53,8 +53,8 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
         <div
           className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
             isUser
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-600'
+              ? 'bg-gray-800 text-white'
+              : 'bg-gray-100 text-gray-600'
           }`}
         >
           {isUser ? '👤' : '🤖'}
@@ -64,8 +64,8 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
         <div
           className={`rounded-2xl px-4 py-3 ${
             isUser
-              ? 'bg-blue-600 text-white rounded-tr-sm'
-              : 'bg-white text-gray-800 shadow-sm border border-gray-100 rounded-tl-sm'
+              ? 'bg-gray-800 text-white rounded-tr-sm'
+              : 'bg-gray-50 text-gray-800 border border-gray-200 rounded-tl-sm'
           }`}
         >
           {/* Text content with Markdown rendering */}

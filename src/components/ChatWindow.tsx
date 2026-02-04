@@ -5,6 +5,7 @@ import { parseSSEStream } from '@/lib/stream';
 import { SearchFilters, SearchMeta, SSEEvent } from '@/types';
 import MessageBubble from './MessageBubble';
 import FilterDisplay from './FilterDisplay';
+import SessionSidebar from './SessionSidebar';
 
 interface Message {
   id: string;
@@ -29,6 +30,8 @@ export default function ChatWindow() {
   const [currentFilters, setCurrentFilters] = useState<SearchFilters | null>(null);
   const [currentMeta, setCurrentMeta] = useState<SearchMeta | null>(null);
   const [progress, setProgress] = useState<ProgressItem[]>([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [loadingSession, setLoadingSession] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -216,40 +219,101 @@ export default function ChatWindow() {
     setCurrentMeta(null);
     setProgress([]);
   };
+
+  // Start a new session
+  const handleNewSession = () => {
+    handleClear();
+  };
+
+  // Load a previous session
+  const handleSelectSession = async (selectedSessionId: string) => {
+    if (selectedSessionId === sessionId) {
+      return;
+    }
+
+    setLoadingSession(true);
+    try {
+      const response = await fetch(`/api/sessions/${selectedSessionId}`);
+      const data = await response.json();
+
+      if (data.success && data.session) {
+        // Convert session messages to our Message format
+        const loadedMessages: Message[] = data.session.messages.map((msg: { role: string; content: string }, index: number) => ({
+          id: `${msg.role}-${index}-${Date.now()}`,
+          role: msg.role as 'user' | 'assistant',
+          content: msg.content,
+          isStreaming: false,
+        }));
+
+        setMessages(loadedMessages);
+        setSessionId(selectedSessionId);
+        setCurrentFilters(null);
+        setCurrentMeta(null);
+      }
+    } catch (error) {
+      console.error('Failed to load session:', error);
+    } finally {
+      setLoadingSession(false);
+    }
+  };
   
   return (
-    <div className="flex flex-col h-screen max-w-4xl mx-auto bg-white">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 shadow-md">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold flex items-center gap-2">
-              🔍 LLM Search Bot
-            </h1>
-            {sessionId && (
-              <p className="text-xs opacity-75 mt-1">
-                Session: {sessionId.slice(0, 20)}...
-              </p>
-            )}
+    <div className="flex h-screen bg-white">
+      {/* Session Sidebar */}
+      <SessionSidebar
+        currentSessionId={sessionId}
+        onSelectSession={handleSelectSession}
+        onNewSession={handleNewSession}
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
+      />
+
+      {/* Main Content - shifts when sidebar is open */}
+      <div className={`flex-1 flex flex-col h-full transition-all duration-300 ${sidebarOpen ? 'lg:ml-64' : ''}`}>
+        {/* Header - simplified */}
+        <header className="flex-shrink-0 bg-white border-b border-gray-200">
+          <div className="flex items-center justify-between w-full max-w-3xl px-4 py-3 mx-auto">
+            <div className={`flex items-center gap-3 ${!sidebarOpen ? 'ml-10' : ''}`}>
+              <span className="text-2xl">🔍</span>
+              <div>
+                <h1 className="text-lg font-semibold text-gray-800">LLM Search Bot Agent</h1>
+                {sessionId && (
+                  <p className="text-xs text-gray-400">
+                    Session: {sessionId.slice(0, 16)}...
+                  </p>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={handleClear}
+              className="px-4 py-2 text-sm text-gray-600 transition-colors rounded-lg hover:text-gray-900 hover:bg-gray-100"
+            >
+              New Chat
+            </button>
           </div>
-          <button
-            onClick={handleClear}
-            className="text-sm px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-          >
-            Clear Chat
-          </button>
-        </div>
-      </header>
+        </header>
+
+        {/* Loading Session Overlay */}
+        {loadingSession && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/80">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-8 h-8 border-gray-300 rounded-full border-3 border-t-gray-600 animate-spin"></div>
+              <p className="text-gray-600">Loading conversation...</p>
+            </div>
+          </div>
+        )}
       
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-        {messages.length === 0 && (
-          <div className="text-center text-gray-500 mt-8 space-y-4">
-            <div className="text-5xl">👋</div>
-            <p className="text-lg font-medium">Hi! I can help you search for people and companies.</p>
-            <div className="text-sm space-y-2">
-              <p>Try these examples:</p>
-              <div className="flex flex-wrap justify-center gap-2">
+      <div className="flex-1 overflow-y-auto bg-white">
+        <div className="max-w-3xl px-4 py-6 mx-auto">
+          {messages.length === 0 && (
+            <div className="mt-16 space-y-6 text-center text-gray-500">
+              <div className="text-6xl">👋</div>
+              <div>
+                <h2 className="mb-2 text-2xl font-semibold text-gray-800">Hi! I can help you search for people and companies.</h2>
+                <p className="text-gray-500">Try these examples:</p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-3 mt-4">
                 {[
                   'Find CTOs in Singapore',
                   'Find AI startups',
@@ -258,88 +322,96 @@ export default function ChatWindow() {
                   <button
                     key={i}
                     onClick={() => setInput(example)}
-                    className="px-3 py-1.5 bg-white border border-gray-200 rounded-full text-gray-700 hover:bg-gray-100 hover:border-gray-300 transition-colors"
+                    className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
                   >
                     {example}
                   </button>
                 ))}
               </div>
             </div>
-          </div>
-        )}
-        
-        {messages.map((message, index) => {
-          const isLastMessage = index === messages.length - 1;
-          const isStreamingAssistant = message.role === 'assistant' && message.isStreaming;
+          )}
           
-          return (
-            <div key={message.id}>
-              {/* Show progress indicators BEFORE the streaming assistant message */}
-              {isLastMessage && isStreamingAssistant && isLoading && progress.length > 0 && (
-                <div className="flex justify-start mb-4">
-                  <div className="flex gap-3 max-w-[85%]">
-                    {/* Avatar - same style as MessageBubble */}
-                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                      <span className="animate-spin">⚙️</span>
-                    </div>
-                    {/* Progress content */}
-                    <div className="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm border border-gray-100">
-                      <div className="text-sm text-gray-600 space-y-1">
-                        {progress.map((p, i) => (
-                          <div key={i} className="flex items-center gap-2">
-                            {p.status === 'started' ? (
-                              <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
-                            ) : (
-                              <span className="w-2 h-2 bg-green-400 rounded-full" />
-                            )}
-                            <span>{p.message || p.node}</span>
+          <div className="space-y-6">
+            {messages.map((message, index) => {
+              const isLastMessage = index === messages.length - 1;
+              const isStreamingAssistant = message.role === 'assistant' && message.isStreaming;
+              
+              return (
+                <div key={message.id}>
+                  {/* Show progress indicators BEFORE the streaming assistant message */}
+                  {isLastMessage && isStreamingAssistant && isLoading && progress.length > 0 && (
+                    <div className="flex justify-start mb-4">
+                      <div className="flex gap-3 max-w-[85%]">
+                        {/* Avatar - same style as MessageBubble */}
+                        <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 bg-gray-100 rounded-full">
+                          <span className="animate-spin">⚙️</span>
+                        </div>
+                        {/* Progress content */}
+                        <div className="px-4 py-3 border border-gray-100 rounded-tl-sm bg-gray-50 rounded-2xl">
+                          <div className="space-y-1 text-sm text-gray-600">
+                            {progress.map((p, i) => (
+                              <div key={i} className="flex items-center gap-2">
+                                {p.status === 'started' ? (
+                                  <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+                                ) : (
+                                  <span className="w-2 h-2 bg-green-400 rounded-full" />
+                                )}
+                                <span>{p.message || p.node}</span>
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
+                  <MessageBubble message={message} />
                 </div>
-              )}
-              <MessageBubble message={message} />
-            </div>
-          );
-        })}
-        
+              );
+            })}
+          </div>
+        </div>
         <div ref={messagesEndRef} />
       </div>
       
-      {/* Input */}
-      <form onSubmit={handleSubmit} className="border-t border-gray-200 p-4 bg-white">
-        <div className="flex gap-2">
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type your search query... (e.g., 'Find CTOs in Singapore')"
-            className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-            disabled={isLoading}
-          />
-          <button
-            type="submit"
-            disabled={isLoading || !input.trim()}
-            className="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-          >
-            {isLoading ? (
-              <>
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>...</span>
-              </>
-            ) : (
-              <>
-                <span>Send</span>
-                <span>→</span>
-              </>
-            )}
-          </button>
+      {/* Input - ChatGPT style */}
+      <div className="flex-shrink-0 bg-white border-t border-gray-200">
+        <div className="max-w-3xl px-4 py-4 mx-auto">
+          <form onSubmit={handleSubmit}>
+            <div className="relative flex items-center">
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type your search query... (e.g., 'Find CTOs in Singapore')"
+                className="w-full px-4 py-3 pr-24 border border-gray-300 shadow-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400 disabled:bg-gray-50 disabled:cursor-not-allowed"
+                disabled={isLoading}
+              />
+              <button
+                type="submit"
+                disabled={isLoading || !input.trim()}
+                className="absolute flex items-center gap-2 px-4 py-2 font-medium text-white transition-colors bg-gray-900 rounded-lg right-2 hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <span className="w-5 h-5 border-2 border-white rounded-full border-t-transparent animate-spin" />
+                ) : (
+                  <>
+                    <span>Send</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+          <p className="mt-3 text-xs text-center text-gray-400">
+            Search for people by job title, company, location, or industry
+          </p>
         </div>
-      </form>
+      </div>
+      </div>
     </div>
   );
 }
