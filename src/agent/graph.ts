@@ -1,6 +1,5 @@
 import { StateGraph, END, START } from '@langchain/langgraph';
 import { ChatOpenAI } from '@langchain/openai';
-import { MemorySaver } from '@langchain/langgraph';
 import { AgentState, AgentStateType } from './state';
 import {
   classifyIntent,
@@ -12,14 +11,43 @@ import {
 } from './nodes';
 import { SSEEvent } from '@/types';
 
+// Initialize global proxy (must be done before any HTTP requests)
+import '@/lib/proxy';
+
 // Create LLM instance
 function createLLM(): ChatOpenAI {
-  return new ChatOpenAI({
+  const config: {
+    modelName: string;
+    temperature: number;
+    streaming: boolean;
+    openAIApiKey?: string;
+    configuration?: {
+      baseURL?: string;
+    };
+  } = {
     modelName: process.env.OPENAI_MODEL || 'gpt-4-turbo-preview',
     temperature: 0.1,
     streaming: true,
     openAIApiKey: process.env.OPENAI_API_KEY,
-  });
+  };
+
+  // Support custom base URL (for proxy services in China)
+  if (process.env.OPENAI_BASE_URL) {
+    config.configuration = {
+      baseURL: process.env.OPENAI_BASE_URL,
+    };
+  }
+
+  return new ChatOpenAI(config);
+}
+
+// Singleton LLM instance
+let llmInstance: ChatOpenAI | null = null;
+function getLLM(): ChatOpenAI {
+  if (!llmInstance) {
+    llmInstance = createLLM();
+  }
+  return llmInstance;
 }
 
 // Node names for progress tracking
@@ -66,7 +94,7 @@ function routeByCompleteness(state: AgentStateType): string {
 
 // Create the search agent graph
 export function createSearchAgent() {
-  const llm = createLLM();
+  const llm = getLLM();
   
   // Create the graph
   const graph = new StateGraph(AgentState)
@@ -128,11 +156,8 @@ export function createSearchAgent() {
     
     .addEdge(NODE_NAMES.GENERATE_RESPONSE, END);
   
-  // Create checkpointer
-  const checkpointer = new MemorySaver();
-  
-  // Compile the graph
-  return graph.compile({ checkpointer });
+  // Compile the graph without checkpointer to avoid serialization issues
+  return graph.compile();
 }
 
 // Run agent with streaming events
@@ -189,6 +214,9 @@ export async function* runAgentWithStreaming(
     let responseContent = '';
     
     for await (const event of eventStream) {
+      // Debug: log all events
+      console.log(`[Event] ${event.event} - ${event.name || 'unnamed'}`);
+      
       // Track node execution
       if (event.event === 'on_chain_start' && event.name && Object.values(NODE_NAMES).includes(event.name as typeof NODE_NAMES[keyof typeof NODE_NAMES])) {
         yield {
@@ -212,10 +240,19 @@ export async function* runAgentWithStreaming(
           timestamp: Date.now(),
         };
         
-        // Capture final state from the last node
+        // Capture response content from generate_response node
         if (event.data?.output && event.name === NODE_NAMES.GENERATE_RESPONSE) {
           if (event.data.output.response) {
             responseContent = event.data.output.response;
+            // Send the full response as content
+            yield {
+              type: 'content',
+              data: {
+                chunk: responseContent,
+                isComplete: true,
+              },
+              timestamp: Date.now(),
+            };
           }
         }
       }
