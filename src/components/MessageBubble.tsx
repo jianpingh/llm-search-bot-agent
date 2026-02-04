@@ -56,16 +56,7 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
             )}
           </div>
           
-          {/* Filters display (for assistant messages) */}
-          {!isUser && message.filters && !message.isStreaming && Object.keys(message.filters).length > 0 && (
-            <div className="mt-3 pt-3 border-t border-gray-200">
-              <FilterDisplay 
-                filters={message.filters} 
-                meta={message.meta}
-                compact 
-              />
-            </div>
-          )}
+          {/* Filters are displayed in the fixed bottom panel, not in each message */}
         </div>
       </div>
     </div>

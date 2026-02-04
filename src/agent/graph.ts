@@ -10,6 +10,7 @@ import {
   isAnyResponse,
 } from './nodes';
 import { SSEEvent } from '@/types';
+import { getCheckpointer } from '@/lib/checkpointer';
 
 // Initialize global proxy (must be done before any HTTP requests)
 import '@/lib/proxy';
@@ -156,8 +157,22 @@ export function createSearchAgent() {
     
     .addEdge(NODE_NAMES.GENERATE_RESPONSE, END);
   
-  // Compile the graph without checkpointer to avoid serialization issues
-  return graph.compile();
+  // Compile the graph (checkpointer will be added in runAgentWithStreaming)
+  return graph;
+}
+
+// Compiled agent cache
+let compiledAgent: ReturnType<typeof StateGraph.prototype.compile> | null = null;
+
+// Get or create compiled agent with checkpointer
+async function getCompiledAgent() {
+  if (!compiledAgent) {
+    const graph = createSearchAgent();
+    const checkpointer = await getCheckpointer();
+    compiledAgent = graph.compile({ checkpointer });
+    console.log('[Agent] Graph compiled with PostgreSQL checkpointer');
+  }
+  return compiledAgent;
 }
 
 // Run agent with streaming events
@@ -171,7 +186,7 @@ export async function* runAgentWithStreaming(
     skipFields?: string[];
   }
 ): AsyncGenerator<SSEEvent> {
-  const agent = createSearchAgent();
+  const agent = await getCompiledAgent();
   
   const config = {
     configurable: {
@@ -179,21 +194,26 @@ export async function* runAgentWithStreaming(
     },
   };
   
-  // Build initial state
+  // Build initial state - with PostgreSQL checkpointer, the state is automatically
+  // loaded from the database based on thread_id, so we only need to provide new input
   const initialState: Partial<AgentStateType> = {
     userInput,
     sessionId,
-    currentFilters: previousState?.currentFilters || {},
-    meta: {
-      domain: previousState?.meta?.domain || 'person',
-      isNewSearch: true,
-      completenessScore: previousState?.meta?.completenessScore || 0,
-      missingFields: previousState?.meta?.missingFields || [],
-      clarificationNeeded: previousState?.meta?.clarificationNeeded || false,
-      clarificationQuestion: previousState?.meta?.clarificationQuestion,
-    },
-    previousContext: previousState?.previousContext || null,
-    skipFields: previousState?.skipFields || [],
+    // Previous state is now managed by the checkpointer
+    // but we still support manual override if provided
+    ...(previousState?.currentFilters && { currentFilters: previousState.currentFilters }),
+    ...(previousState?.meta && {
+      meta: {
+        domain: previousState.meta.domain || 'person',
+        isNewSearch: previousState.meta.isNewSearch ?? true,
+        completenessScore: previousState.meta.completenessScore || 0,
+        missingFields: previousState.meta.missingFields || [],
+        clarificationNeeded: previousState.meta.clarificationNeeded || false,
+        clarificationQuestion: previousState.meta.clarificationQuestion,
+      },
+    }),
+    ...(previousState?.previousContext && { previousContext: previousState.previousContext }),
+    ...(previousState?.skipFields && { skipFields: previousState.skipFields }),
   };
   
   // Send heartbeat
@@ -211,14 +231,12 @@ export async function* runAgentWithStreaming(
     });
     
     let finalState: AgentStateType | null = null;
-    let responseContent = '';
+    let currentNode: string | null = null;  // Track current executing node
     
     for await (const event of eventStream) {
-      // Debug: log all events
-      console.log(`[Event] ${event.event} - ${event.name || 'unnamed'}`);
-      
       // Track node execution
       if (event.event === 'on_chain_start' && event.name && Object.values(NODE_NAMES).includes(event.name as typeof NODE_NAMES[keyof typeof NODE_NAMES])) {
+        currentNode = event.name;
         yield {
           type: 'progress',
           data: {
@@ -239,26 +257,14 @@ export async function* runAgentWithStreaming(
           },
           timestamp: Date.now(),
         };
-        
-        // Capture response content from generate_response node
-        if (event.data?.output && event.name === NODE_NAMES.GENERATE_RESPONSE) {
-          if (event.data.output.response) {
-            responseContent = event.data.output.response;
-            // Send the full response as content
-            yield {
-              type: 'content',
-              data: {
-                chunk: responseContent,
-                isComplete: true,
-              },
-              timestamp: Date.now(),
-            };
-          }
-        }
+        currentNode = null;
       }
       
-      // Stream LLM content (for response generation)
-      if (event.event === 'on_llm_stream' && event.data?.chunk?.content) {
+      // Stream LLM content ONLY from generate_response node
+      // Note: LangGraph v2 uses on_chat_model_stream instead of on_llm_stream
+      if (event.event === 'on_chat_model_stream' && 
+          currentNode === NODE_NAMES.GENERATE_RESPONSE &&
+          event.data?.chunk?.content) {
         const content = event.data.chunk.content as string;
         if (content) {
           yield {

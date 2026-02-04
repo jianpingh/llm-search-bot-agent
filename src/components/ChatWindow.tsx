@@ -268,44 +268,39 @@ export default function ChatWindow() {
           </div>
         )}
         
-        {messages.map(message => (
-          <MessageBubble key={message.id} message={message} />
-        ))}
-        
-        {/* Progress indicators */}
-        {isLoading && progress.length > 0 && (
-          <div className="flex items-start gap-3 px-4">
-            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-              <span className="text-blue-600 animate-spin">⚙️</span>
-            </div>
-            <div className="text-xs text-gray-500 space-y-1 pt-2">
-              {progress.map((p, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  {p.status === 'started' ? (
-                    <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
-                  ) : (
-                    <span className="w-2 h-2 bg-green-400 rounded-full" />
-                  )}
-                  <span>{p.message || p.node}</span>
+        {messages.map((message, index) => {
+          const isLastMessage = index === messages.length - 1;
+          const isStreamingAssistant = message.role === 'assistant' && message.isStreaming;
+          
+          return (
+            <div key={message.id}>
+              {/* Show progress indicators BEFORE the streaming assistant message */}
+              {isLastMessage && isStreamingAssistant && isLoading && progress.length > 0 && (
+                <div className="flex items-start gap-3 px-4 mb-4">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-blue-600 animate-spin">⚙️</span>
+                  </div>
+                  <div className="text-xs text-gray-500 space-y-1 pt-2">
+                    {progress.map((p, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        {p.status === 'started' ? (
+                          <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+                        ) : (
+                          <span className="w-2 h-2 bg-green-400 rounded-full" />
+                        )}
+                        <span>{p.message || p.node}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
+              )}
+              <MessageBubble message={message} />
             </div>
-          </div>
-        )}
+          );
+        })}
         
         <div ref={messagesEndRef} />
       </div>
-      
-      {/* Current Filters Summary */}
-      {currentFilters && Object.keys(currentFilters).length > 0 && (
-        <div className="border-t border-gray-200 p-4 bg-blue-50">
-          <FilterDisplay 
-            filters={currentFilters} 
-            meta={currentMeta || undefined}
-            compact 
-          />
-        </div>
-      )}
       
       {/* Input */}
       <form onSubmit={handleSubmit} className="border-t border-gray-200 p-4 bg-white">
