@@ -24,37 +24,92 @@ function normalizeString(str: string): string {
 
 // Industry aliases for flexible matching
 const INDUSTRY_ALIASES: Record<string, string[]> = {
-  'technology': ['tech', 'software', 'it', 'artificial intelligence', 'ai', 'machine learning', 'ml', 'deep learning', 'data science', 'cloud', 'saas', 'computer'],
-  'finance': ['fintech', 'banking', 'financial', 'investment', 'trading', 'insurance'],
-  'healthcare': ['health', 'medical', 'biotech', 'pharma', 'hospital', 'clinic'],
-  'e-commerce': ['ecommerce', 'retail', 'shopping', 'marketplace'],
-  'education': ['edtech', 'learning', 'school', 'university', 'training'],
-  'retail': ['shopping', 'store', 'consumer', 'fashion'],
+  'technology': ['tech', 'software', 'it', 'artificial intelligence', 'ai', 'machine learning', 'ml', 'deep learning', 'data science', 'cloud', 'saas', 'computer', '科技', '技术', '互联网'],
+  'finance': ['fintech', 'banking', 'financial', 'investment', 'trading', 'insurance', '金融', '银行', '投资'],
+  'healthcare': ['health', 'medical', 'biotech', 'pharma', 'hospital', 'clinic', '医疗', '健康', '生物'],
+  'e-commerce': ['ecommerce', 'retail', 'shopping', 'marketplace', '电商', '零售'],
+  'education': ['edtech', 'learning', 'school', 'university', 'training', '教育', '培训'],
+  'retail': ['shopping', 'store', 'consumer', 'fashion', '零售', '消费'],
 };
 
-// Location aliases for flexible matching
+// Location aliases for flexible matching (city -> country/region names)
 const LOCATION_ALIASES: Record<string, string[]> = {
-  'london': ['uk', 'united kingdom', 'britain', 'england', 'europe'],
-  'berlin': ['germany', 'deutschland', 'europe'],
-  'munich': ['germany', 'deutschland', 'europe'],
-  'paris': ['france', 'europe'],
-  'milan': ['italy', 'italia', 'europe'],
-  'barcelona': ['spain', 'españa', 'europe'],
-  'dublin': ['ireland', 'europe'],
-  'helsinki': ['finland', 'europe', 'nordic'],
-  'singapore': ['sg', 'asia'],
-  'tokyo': ['japan', 'asia'],
-  'new york': ['usa', 'united states', 'america', 'ny', 'nyc'],
-  'san francisco': ['usa', 'united states', 'america', 'sf', 'bay area', 'silicon valley'],
-  'seattle': ['usa', 'united states', 'america'],
-  'boston': ['usa', 'united states', 'america'],
-  'austin': ['usa', 'united states', 'america', 'texas'],
-  'sydney': ['australia'],
-  'hong kong': ['hk', 'asia'],
-  'seoul': ['korea', 'south korea', 'asia'],
-  'menlo park': ['usa', 'united states', 'america', 'silicon valley'],
-  'mountain view': ['usa', 'united states', 'america', 'silicon valley'],
+  'london': ['uk', 'united kingdom', 'britain', 'england', 'europe', '英国', '伦敦', '欧洲'],
+  'berlin': ['germany', 'deutschland', 'europe', '德国', '柏林', '欧洲'],
+  'munich': ['germany', 'deutschland', 'europe', '德国', '慕尼黑', '欧洲'],
+  'paris': ['france', 'europe', '法国', '巴黎', '欧洲'],
+  'milan': ['italy', 'italia', 'europe', '意大利', '米兰', '欧洲'],
+  'barcelona': ['spain', 'españa', 'europe', '西班牙', '巴塞罗那', '欧洲'],
+  'dublin': ['ireland', 'europe', '爱尔兰', '都柏林', '欧洲'],
+  'helsinki': ['finland', 'europe', 'nordic', '芬兰', '赫尔辛基', '欧洲', '北欧'],
+  'amsterdam': ['netherlands', 'holland', 'europe', '荷兰', '阿姆斯特丹', '欧洲'],
+  'stockholm': ['sweden', 'europe', 'nordic', '瑞典', '斯德哥尔摩', '欧洲', '北欧'],
+  'zurich': ['switzerland', 'swiss', 'europe', '瑞士', '苏黎世', '欧洲'],
+  'singapore': ['sg', 'asia', '新加坡', '亚洲'],
+  'tokyo': ['japan', 'asia', '日本', '东京', '亚洲'],
+  'new york': ['usa', 'united states', 'america', 'ny', 'nyc', '美国', '纽约'],
+  'san francisco': ['usa', 'united states', 'america', 'sf', 'bay area', 'silicon valley', '美国', '旧金山', '硅谷'],
+  'seattle': ['usa', 'united states', 'america', '美国', '西雅图'],
+  'boston': ['usa', 'united states', 'america', '美国', '波士顿'],
+  'austin': ['usa', 'united states', 'america', 'texas', '美国', '奥斯汀'],
+  'sydney': ['australia', '澳大利亚', '悉尼'],
+  'hong kong': ['hk', 'asia', '香港', '亚洲'],
+  'seoul': ['korea', 'south korea', 'asia', '韩国', '首尔', '亚洲'],
+  'menlo park': ['usa', 'united states', 'america', 'silicon valley', '美国', '硅谷'],
+  'mountain view': ['usa', 'united states', 'america', 'silicon valley', '美国', '硅谷'],
 };
+
+// Job title aliases for flexible matching (English title -> Chinese/alternative names)
+const JOB_TITLE_ALIASES: Record<string, string[]> = {
+  'product manager': ['pm', '产品经理', '产品管理', 'product management'],
+  'senior product manager': ['senior pm', '高级产品经理', '资深产品经理'],
+  'software engineer': ['swe', 'developer', 'programmer', '软件工程师', '开发工程师', '程序员'],
+  'senior software engineer': ['senior swe', 'senior developer', '高级软件工程师', '高级开发'],
+  'cto': ['chief technology officer', '首席技术官', '技术总监'],
+  'ceo': ['chief executive officer', '首席执行官', '总裁'],
+  'cfo': ['chief financial officer', '首席财务官', '财务总监'],
+  'vp of engineering': ['vp engineering', 'engineering vp', '工程副总裁', '技术副总裁'],
+  'data scientist': ['data science', '数据科学家', '数据分析师'],
+  'ml engineer': ['machine learning engineer', '机器学习工程师', 'ai engineer', 'ai工程师'],
+  'designer': ['ui designer', 'ux designer', '设计师', '产品设计师'],
+  'marketing': ['marketing manager', 'marketing director', '市场经理', '市场总监'],
+};
+
+function matchesJobTitle(value: string, filter: string | string[] | undefined): boolean {
+  if (!filter || (Array.isArray(filter) && filter.length === 0)) {
+    return true;
+  }
+  
+  const normalizedValue = normalizeString(value);
+  const filters = Array.isArray(filter) ? filter : [filter];
+  
+  return filters.some(f => {
+    const normalizedFilter = normalizeString(f);
+    
+    // Direct match
+    if (normalizedValue.includes(normalizedFilter) || normalizedFilter.includes(normalizedValue)) {
+      return true;
+    }
+    
+    // Check aliases
+    for (const [title, aliases] of Object.entries(JOB_TITLE_ALIASES)) {
+      // If value contains this title, check if filter matches any alias
+      if (normalizedValue.includes(title)) {
+        if (aliases.some(alias => normalizedFilter.includes(alias))) {
+          return true;
+        }
+      }
+      // If filter matches title or any alias, check if value contains this title
+      if (normalizedFilter.includes(title) || aliases.some(alias => normalizedFilter.includes(alias))) {
+        if (normalizedValue.includes(title)) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  });
+}
 
 function matchesIndustry(value: string, filter: string | string[] | undefined): boolean {
   if (!filter || (Array.isArray(filter) && filter.length === 0)) {
@@ -186,8 +241,8 @@ function matchesExperience(years: number, filter: string | undefined): boolean {
 
 export function searchPeople(filters: SimpleSearchFilters): Person[] {
   return mockPeople.filter(person => {
-    // Match job title
-    if (!matchesFilter(person.title, filters.jobTitle)) {
+    // Match job title (use flexible job title matching)
+    if (!matchesJobTitle(person.title, filters.jobTitle)) {
       return false;
     }
     
