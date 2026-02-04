@@ -251,15 +251,25 @@ export function searchCompanies(filters: SimpleSearchFilters): Company[] {
   });
 }
 
-export function search(filters: SimpleSearchFilters): SearchResult {
-  const people = searchPeople(filters);
-  const companies = searchCompanies(filters);
+export function search(filters: SimpleSearchFilters, domain: 'person' | 'company' = 'person'): SearchResult {
+  // Search based on domain
+  if (domain === 'company') {
+    const companies = searchCompanies(filters);
+    return {
+      people: [],
+      companies,
+      totalPeople: 0,
+      totalCompanies: companies.length,
+    };
+  }
   
+  // Default: search people
+  const people = searchPeople(filters);
   return {
     people,
-    companies,
+    companies: [],
     totalPeople: people.length,
-    totalCompanies: companies.length,
+    totalCompanies: 0,
   };
 }
 
@@ -267,37 +277,35 @@ export function formatSearchResults(result: SearchResult): string {
   const parts: string[] = [];
   
   if (result.totalPeople > 0) {
-    parts.push(`Found ${result.totalPeople} matching candidates:\n`);
+    parts.push(`🔍 **Search Complete! Found ${result.totalPeople} matching candidates:**\n`);
     result.people.slice(0, 10).forEach((person, index) => {
-      parts.push(`${index + 1}. Name: ${person.name}`);
-      parts.push(`   Title: ${person.title}`);
-      parts.push(`   Company: ${person.company}`);
-      parts.push(`   Location: ${person.location}`);
-      parts.push(`   Industry: ${person.industry}`);
-      parts.push(`   Seniority: ${person.seniority}`);
-      parts.push(`   Company Size: ${person.companyHeadcount}`);
-      parts.push(`   Years of Experience: ${person.yearsOfExperience}`);
-      parts.push(`   Skills: ${person.skills.join(', ')}\n`);
+      parts.push(`**${index + 1}. ${person.name}** - ${person.title} @ ${person.company}`);
+      parts.push(`   - 📍 Location: ${person.location}`);
+      parts.push(`   - 🏢 Industry: ${person.industry}`);
+      parts.push(`   - 👔 Seniority: ${person.seniority}`);
+      parts.push(`   - 📊 Company Size: ${person.companyHeadcount}`);
+      parts.push(`   - ⏱️ Experience: ${person.yearsOfExperience} years`);
+      parts.push(`   - 🔧 Skills: ${person.skills.join(', ')}\n`);
     });
     
     if (result.totalPeople > 10) {
-      parts.push(`... and ${result.totalPeople - 10} more candidates`);
+      parts.push(`\n... and ${result.totalPeople - 10} more candidates`);
     }
   }
   
   if (result.totalCompanies > 0) {
-    parts.push(`\nFound ${result.totalCompanies} matching companies:\n`);
+    parts.push(`\n**Found ${result.totalCompanies} matching companies:**\n`);
     result.companies.slice(0, 5).forEach((company, index) => {
-      parts.push(`${index + 1}. Name: ${company.name}`);
-      parts.push(`   Industry: ${company.industry}`);
-      parts.push(`   Location: ${company.location}`);
-      parts.push(`   Size: ${company.headcount}`);
-      parts.push(`   Type: ${company.type}\n`);
+      parts.push(`**${index + 1}. ${company.name}**`);
+      parts.push(`   - 🏢 Industry: ${company.industry}`);
+      parts.push(`   - 📍 Location: ${company.location}`);
+      parts.push(`   - 📊 Size: ${company.headcount}`);
+      parts.push(`   - 🏷️ Type: ${company.type}\n`);
     });
   }
   
   if (result.totalPeople === 0 && result.totalCompanies === 0) {
-    parts.push('No matching results found.');
+    parts.push('😔 **No matching results found**\n\nSuggestions:\n- Try broadening your search criteria\n- Check if location or industry is correct\n- Use more general job titles');
   }
   
   return parts.join('\n');

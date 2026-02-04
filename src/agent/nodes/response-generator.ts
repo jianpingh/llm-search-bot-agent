@@ -61,34 +61,19 @@ export async function generateResponse(
   
   const shouldExecuteSearch = hasFilters && (isConfirm || (hasConfirmWords && !needsClarification));
   
-  // If user confirms search, execute and let LLM present results
+  // If user confirms search, execute and return results directly
   if (shouldExecuteSearch) {
     const searchFilters = convertFiltersForSearch(filters);
-    console.log('[Search] Executing search with filters:', JSON.stringify(searchFilters));
-    const results = search(searchFilters);
+    const searchDomain = meta.domain || 'person';
+    console.log('[Search] Executing search with filters:', JSON.stringify(searchFilters), 'domain:', searchDomain);
+    const results = search(searchFilters, searchDomain);
     const formattedResults = formatSearchResults(results);
     
-    // Pass search results to LLM for natural response
-    const searchResultContext = buildSearchResultContext(filters, results, formattedResults, userInput);
-    
-    try {
-      const response = await llm.invoke([
-        new SystemMessage(SEARCH_RESULT_SYSTEM_PROMPT),
-        new HumanMessage(searchResultContext)
-      ]);
-      
-      return {
-        response: response.content as string,
-        searchExecuted: true,
-      };
-    } catch (e) {
-      console.error('Failed to generate search result response:', e);
-      // Fallback to formatted results if LLM fails
-      return {
-        response: `🔍 **Search Complete!**\n\n${formattedResults}`,
-        searchExecuted: true,
-      };
-    }
+    // Return formatted results directly without LLM
+    return {
+      response: formattedResults,
+      searchExecuted: true,
+    };
   }
   
   // Otherwise, build context for LLM response
@@ -131,31 +116,17 @@ export async function* generateResponseStream(
   
   const shouldExecuteSearch = hasFilters && (isConfirm || (hasConfirmWords && !needsClarification));
   
-  // If executing search, stream results through LLM
+  // If executing search, return results directly (no LLM)
   if (shouldExecuteSearch) {
     const searchFilters = convertFiltersForSearch(filters);
-    console.log('[Search Stream] Executing search with filters:', JSON.stringify(searchFilters));
-    const results = search(searchFilters);
+    const searchDomain = meta.domain || 'person';
+    console.log('[Search Stream] Executing search with filters:', JSON.stringify(searchFilters), 'domain:', searchDomain);
+    const results = search(searchFilters, searchDomain);
     const formattedResults = formatSearchResults(results);
-    const searchResultContext = buildSearchResultContext(filters, results, formattedResults, userInput);
     
-    try {
-      const stream = await llm.stream([
-        new SystemMessage(SEARCH_RESULT_SYSTEM_PROMPT),
-        new HumanMessage(searchResultContext)
-      ]);
-      
-      for await (const chunk of stream) {
-        if (typeof chunk.content === 'string') {
-          yield chunk.content;
-        }
-      }
-      return;
-    } catch (e) {
-      console.error('Failed to stream search result response:', e);
-      yield `🔍 **Search Complete!**\n\n${formattedResults}`;
-      return;
-    }
+    // Return formatted results directly without LLM
+    yield formattedResults;
+    return;
   }
   
   const context = buildResponseContext(filters, meta, needsClarification, intent, userInput);
