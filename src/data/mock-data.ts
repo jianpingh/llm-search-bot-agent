@@ -151,6 +151,17 @@ export const mockPeople: Person[] = [
   { id: '73', name: 'Dinesh C', title: 'Senior Engineer', seniority: 'Senior', location: 'San Francisco', industry: 'Technology', company: 'PiedPiper', companyHeadcount: '11-50', yearsOfExperience: 6, skills: ['Java', 'Scala', 'Tesla'] },
   { id: '74', name: 'Bertram Gilfoyle', title: 'Systems Architect', seniority: 'Senior', location: 'San Francisco', industry: 'Technology', company: 'PiedPiper', companyHeadcount: '11-50', yearsOfExperience: 7, skills: ['Security', 'Server Architecture', 'Hardware'] },
   { id: '75', name: 'Jared Dunn', title: 'COO', seniority: 'C-Level', location: 'San Francisco', industry: 'Technology', company: 'PiedPiper', companyHeadcount: '11-50', yearsOfExperience: 8, skills: ['Business Development', 'Management', 'Support'] },
+
+  // European AI Startups
+  { id: '76', name: 'Marie Curie', title: 'AI Research Director', seniority: 'Director', location: 'Paris', industry: 'Technology', company: 'AI Labs Paris', companyHeadcount: '11-50', yearsOfExperience: 12, skills: ['Deep Learning', 'NLP', 'Research'] },
+  { id: '77', name: 'Jean Dupont', title: 'ML Engineer', seniority: 'Senior', location: 'Paris', industry: 'Technology', company: 'DeepTech France', companyHeadcount: '1-10', yearsOfExperience: 5, skills: ['PyTorch', 'Computer Vision', 'Python'] },
+  { id: '78', name: 'Sophie Martin', title: 'CTO', seniority: 'C-Level', location: 'Paris', industry: 'Technology', company: 'TechParis AI', companyHeadcount: '11-50', yearsOfExperience: 10, skills: ['AI Strategy', 'Cloud', 'Leadership'] },
+  { id: '79', name: 'Klaus Weber', title: 'AI Engineer', seniority: 'Senior', location: 'Berlin', industry: 'Technology', company: 'AI Berlin Labs', companyHeadcount: '1-10', yearsOfExperience: 4, skills: ['TensorFlow', 'MLOps', 'Python'] },
+  { id: '80', name: 'Anna Schmidt', title: 'Data Scientist', seniority: 'Senior', location: 'Munich', industry: 'Technology', company: 'DataAI Munich', companyHeadcount: '11-50', yearsOfExperience: 6, skills: ['Machine Learning', 'Statistics', 'R'] },
+  { id: '81', name: 'Oliver Smith', title: 'Founding Engineer', seniority: 'Senior', location: 'London', industry: 'Technology', company: 'AI Startup UK', companyHeadcount: '1-10', yearsOfExperience: 7, skills: ['Full Stack', 'AI', 'Startup'] },
+  { id: '82', name: 'Liam O\'Connor', title: 'ML Research Lead', seniority: 'Senior', location: 'Dublin', industry: 'Technology', company: 'MLIreland', companyHeadcount: '11-50', yearsOfExperience: 8, skills: ['NLP', 'LLMs', 'Python'] },
+  { id: '83', name: 'Marco Rossi', title: 'AI Product Manager', seniority: 'Senior', location: 'Milan', industry: 'Technology', company: 'AIItalia', companyHeadcount: '1-10', yearsOfExperience: 6, skills: ['Product', 'AI', 'Strategy'] },
+  { id: '84', name: 'Erik Johansson', title: 'Deep Learning Engineer', seniority: 'Senior', location: 'Helsinki', industry: 'Technology', company: 'NordicAI', companyHeadcount: '11-50', yearsOfExperience: 5, skills: ['Deep Learning', 'PyTorch', 'Research'] },
 ];
 
 export const mockCompanies: Company[] = [
@@ -199,4 +210,17 @@ export const mockCompanies: Company[] = [
   // Silicon Valley Fictional
   { id: 'c30', name: 'PiedPiper', industry: 'Technology', location: 'San Francisco', headcount: '11-50', type: 'Startup' },
   { id: 'c31', name: 'Hooli', industry: 'Technology', location: 'San Francisco', headcount: '5001+', type: 'Enterprise' },
+  
+  // European AI Startups
+  { id: 'c32', name: 'AI Labs Paris', industry: 'Technology', location: 'Paris', headcount: '11-50', type: 'Startup' },
+  { id: 'c33', name: 'DeepTech France', industry: 'Technology', location: 'Paris', headcount: '1-10', type: 'Startup' },
+  { id: 'c34', name: 'TechParis AI', industry: 'Technology', location: 'Paris', headcount: '11-50', type: 'Startup' },
+  { id: 'c35', name: 'AI Berlin Labs', industry: 'Technology', location: 'Berlin', headcount: '1-10', type: 'Startup' },
+  { id: 'c36', name: 'DataAI Munich', industry: 'Technology', location: 'Munich', headcount: '11-50', type: 'Startup' },
+  { id: 'c37', name: 'AI Startup UK', industry: 'Technology', location: 'London', headcount: '1-10', type: 'Startup' },
+  { id: 'c38', name: 'MLIreland', industry: 'Technology', location: 'Dublin', headcount: '11-50', type: 'Startup' },
+  { id: 'c39', name: 'AIItalia', industry: 'Technology', location: 'Milan', headcount: '1-10', type: 'Startup' },
+  { id: 'c40', name: 'NordicAI', industry: 'Technology', location: 'Helsinki', headcount: '11-50', type: 'Startup' },
+  { id: 'c41', name: 'StartupLondon', industry: 'Technology', location: 'London', headcount: '1-10', type: 'Startup' },
+  { id: 'c42', name: 'CodeBerlin', industry: 'Technology', location: 'Berlin', headcount: '11-50', type: 'Startup' },
 ];

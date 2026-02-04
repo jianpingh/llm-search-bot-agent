@@ -61,18 +61,34 @@ export async function generateResponse(
   
   const shouldExecuteSearch = hasFilters && (isConfirm || (hasConfirmWords && !needsClarification));
   
-  // If user confirms search, execute and return results
+  // If user confirms search, execute and let LLM present results
   if (shouldExecuteSearch) {
     const searchFilters = convertFiltersForSearch(filters);
     console.log('[Search] Executing search with filters:', JSON.stringify(searchFilters));
     const results = search(searchFilters);
     const formattedResults = formatSearchResults(results);
     
-    return {
-      response: `🔍 **搜索完成！**\n\n${formattedResults}`,
-      // Mark search as executed to prevent loop
-      searchExecuted: true,
-    };
+    // Pass search results to LLM for natural response
+    const searchResultContext = buildSearchResultContext(filters, results, formattedResults, userInput);
+    
+    try {
+      const response = await llm.invoke([
+        new SystemMessage(SEARCH_RESULT_SYSTEM_PROMPT),
+        new HumanMessage(searchResultContext)
+      ]);
+      
+      return {
+        response: response.content as string,
+        searchExecuted: true,
+      };
+    } catch (e) {
+      console.error('Failed to generate search result response:', e);
+      // Fallback to formatted results if LLM fails
+      return {
+        response: `🔍 **搜索完成！**\n\n${formattedResults}`,
+        searchExecuted: true,
+      };
+    }
   }
   
   // Otherwise, build context for LLM response
@@ -106,6 +122,42 @@ export async function* generateResponseStream(
   const intent = state.intent;
   const userInput = state.userInput;
   
+  // Check if we should execute search
+  const hasFilters = Object.keys(filters).some(k => filters[k as keyof SearchFilters]?.value);
+  const isConfirm = intent?.type === 'confirm';
+  const hasConfirmWords = ['yes', 'please', 'ok', 'sure', 'go', 'search', 'find', 'proceed', 
+                           '是', '好', '可以', '搜索', '开始', '执行', '查找', '确认']
+                          .some(word => userInput.toLowerCase().trim().includes(word));
+  
+  const shouldExecuteSearch = hasFilters && (isConfirm || (hasConfirmWords && !needsClarification));
+  
+  // If executing search, stream results through LLM
+  if (shouldExecuteSearch) {
+    const searchFilters = convertFiltersForSearch(filters);
+    console.log('[Search Stream] Executing search with filters:', JSON.stringify(searchFilters));
+    const results = search(searchFilters);
+    const formattedResults = formatSearchResults(results);
+    const searchResultContext = buildSearchResultContext(filters, results, formattedResults, userInput);
+    
+    try {
+      const stream = await llm.stream([
+        new SystemMessage(SEARCH_RESULT_SYSTEM_PROMPT),
+        new HumanMessage(searchResultContext)
+      ]);
+      
+      for await (const chunk of stream) {
+        if (typeof chunk.content === 'string') {
+          yield chunk.content;
+        }
+      }
+      return;
+    } catch (e) {
+      console.error('Failed to stream search result response:', e);
+      yield `🔍 **搜索完成！**\n\n${formattedResults}`;
+      return;
+    }
+  }
+  
   const context = buildResponseContext(filters, meta, needsClarification, intent, userInput);
   
   try {
@@ -123,6 +175,51 @@ export async function* generateResponseStream(
     console.error('Failed to stream response:', e);
     yield generateFallbackResponse(filters, meta, needsClarification);
   }
+}
+
+// System prompt for presenting search results
+const SEARCH_RESULT_SYSTEM_PROMPT = `You are a helpful recruiting assistant presenting search results to the user.
+
+Your task:
+1. Present the search results in a friendly, professional manner
+2. Highlight key information about the candidates/companies found
+3. If no results found, explain possible reasons and suggest adjustments
+4. Offer to refine the search or provide more details
+5. Respond in the same language as the user's input
+
+Format guidelines:
+- Use clear formatting with bullet points or numbered lists
+- Highlight important details like name, title, company, and key skills
+- Keep the response concise but informative
+- Add relevant emojis to make it visually appealing
+- If many results, summarize the top ones and mention total count
+`;
+
+function buildSearchResultContext(
+  filters: SearchFilters,
+  results: { people: any[]; companies: any[]; totalPeople: number; totalCompanies: number },
+  formattedResults: string,
+  userInput: string
+): string {
+  const filterSummary = formatFiltersForContext(filters);
+  
+  return `
+User's search request: "${userInput}"
+
+Search filters applied:
+${filterSummary || '(No specific filters)'}
+
+Search Results:
+Total people found: ${results.totalPeople}
+Total companies found: ${results.totalCompanies}
+
+Detailed results:
+${formattedResults}
+
+Please present these results to the user in a friendly, helpful manner.
+If no results were found, suggest ways to broaden the search.
+Respond in the same language as the user's input.
+`;
 }
 
 function buildResponseContext(
