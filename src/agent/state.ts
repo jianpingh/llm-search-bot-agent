@@ -88,6 +88,12 @@ export const AgentState = Annotation.Root({
     },
     default: () => [],
   }),
+  
+  // Search executed flag - prevents infinite loop after search
+  searchExecuted: Annotation<boolean>({
+    reducer: (_, update) => update,
+    default: () => false,
+  }),
 });
 
 // Helper function to merge filters

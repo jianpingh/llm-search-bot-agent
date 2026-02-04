@@ -76,6 +76,81 @@ export const mockPeople: Person[] = [
   { id: '28', name: 'Maria Garcia', title: 'Data Scientist', seniority: 'Mid-Level', location: 'Barcelona', industry: 'E-commerce', company: 'DataShop ES', companyHeadcount: '11-50', yearsOfExperience: 4, skills: ['Python', 'SQL', 'Machine Learning'] },
   { id: '29', name: 'Thomas Schmidt', title: 'Backend Developer', seniority: 'Senior', location: 'Berlin', industry: 'Technology', company: 'CodeBerlin', companyHeadcount: '11-50', yearsOfExperience: 8, skills: ['Go', 'PostgreSQL', 'gRPC'] },
   { id: '30', name: 'Olivia White', title: 'Frontend Engineer', seniority: 'Mid-Level', location: 'Sydney', industry: 'Technology', company: 'WebDev Australia', companyHeadcount: '51-200', yearsOfExperience: 5, skills: ['React', 'TypeScript', 'CSS'] },
+
+  // Healthcare & BioTech
+  { id: '31', name: 'Dr. Sarah Lim', title: 'Chief Medical Officer', seniority: 'C-Level', location: 'Singapore', industry: 'Healthcare', company: 'HealthStart SG', companyHeadcount: '51-200', yearsOfExperience: 15, skills: ['Medicine', 'Clinical Trials', 'Leadership'] },
+  { id: '32', name: 'James Chen', title: 'CTO', seniority: 'C-Level', location: 'San Francisco', industry: 'Healthcare', company: 'HealthTech Solutions', companyHeadcount: '11-50', yearsOfExperience: 12, skills: ['HealthTech', 'HIPAA', 'Cloud'] },
+  { id: '33', name: 'Emily Wong', title: 'Senior Researcher', seniority: 'Senior', location: 'London', industry: 'Healthcare', company: 'BioGen UK', companyHeadcount: '501-1000', yearsOfExperience: 8, skills: ['Bioinformatics', 'Python', 'R'] },
+  { id: '34', name: 'Michael Chang', title: 'Product Manager', seniority: 'Mid-Level', location: 'Singapore', industry: 'Healthcare', company: 'MedCare App', companyHeadcount: '11-50', yearsOfExperience: 5, skills: ['Healthcare', 'Product Management', 'UX'] },
+  { id: '35', name: 'Lisa Kumar', title: 'Data Scientist', seniority: 'Senior', location: 'New York', industry: 'Healthcare', company: 'PharmaAnalytica', companyHeadcount: '201-500', yearsOfExperience: 7, skills: ['Biostatistics', 'Machine Learning', 'SQL'] },
+  { id: '36', name: 'Robert Wilson', title: 'VP of Engineering', seniority: 'VP', location: 'Boston', industry: 'Healthcare', company: 'MediTech Systems', companyHeadcount: '501-1000', yearsOfExperience: 18, skills: ['Engineering Management', 'Healthcare IT', 'Compliance'] },
+
+  // Finance & FinTech
+  { id: '37', name: 'David Miller', title: 'CFO', seniority: 'C-Level', location: 'New York', industry: 'Finance', company: 'GlobalBank Corp', companyHeadcount: '5001+', yearsOfExperience: 20, skills: ['Finance', 'Strategy', 'M&A'] },
+  { id: '38', name: 'Jennifer Wu', title: 'VP Engineering', seniority: 'VP', location: 'Singapore', industry: 'Finance', company: 'QuantTrade Asia', companyHeadcount: '51-200', yearsOfExperience: 14, skills: ['High Frequency Trading', 'C++', 'System Architecture'] },
+  { id: '39', name: 'Thomas Anderson', title: 'Blockchain Developer', seniority: 'Senior', location: 'London', industry: 'Finance', company: 'CryptoTransact', companyHeadcount: '11-50', yearsOfExperience: 6, skills: ['Solidity', 'Smart Contracts', 'Web3'] },
+  { id: '40', name: 'Amanda Lewis', title: 'Investment Analyst', seniority: 'Mid-Level', location: 'Hong Kong', industry: 'Finance', company: 'AsiaCapital', companyHeadcount: '201-500', yearsOfExperience: 4, skills: ['Financial Modeling', 'Valuation', 'Research'] },
+  { id: '41', name: 'Kevin Zhang', title: 'Quantitative Researcher', seniority: 'Senior', location: 'New York', industry: 'Finance', company: 'HedgeFund X', companyHeadcount: '51-200', yearsOfExperience: 8, skills: ['Python', 'Statistics', 'Mathematics'] },
+
+  // Retail & E-commerce
+  { id: '42', name: 'Rachel Green', title: 'Head of E-commerce', seniority: 'Director', location: 'London', industry: 'Retail', company: 'FashionForward', companyHeadcount: '201-500', yearsOfExperience: 10, skills: ['E-commerce', 'Digital Marketing', 'Merchandising'] },
+  { id: '43', name: 'Daniel Kim', title: 'Supply Chain Manager', seniority: 'Manager', location: 'Seoul', industry: 'Retail', company: 'GlobalGoods', companyHeadcount: '1001-5000', yearsOfExperience: 9, skills: ['Supply Chain', 'Logistics', 'Operations'] },
+  { id: '44', name: 'Laura Martinez', title: 'UX Researcher', seniority: 'Senior', location: 'Barcelona', industry: 'Retail', company: 'ShopEasy ES', companyHeadcount: '51-200', yearsOfExperience: 6, skills: ['User Research', 'Usability Testing', 'Spanish'] },
+  { id: '45', name: 'Steve Wozniak', title: 'Mobile Developer', seniority: 'Senior', location: 'San Francisco', industry: 'Retail', company: 'CartApp', companyHeadcount: '11-50', yearsOfExperience: 7, skills: ['iOS', 'Swift', 'Mobile Tech'] },
+
+  // Education & EdTech
+  { id: '46', name: 'Prof. Alan Turing', title: 'Chief Learning Officer', seniority: 'C-Level', location: 'London', industry: 'Education', company: 'EduTech Global', companyHeadcount: '201-500', yearsOfExperience: 25, skills: ['Education', 'AI', 'Curriculum Design'] },
+  { id: '47', name: 'Mary Johnson', title: 'Senior Instructor', seniority: 'Senior', location: 'Singapore', industry: 'Education', company: 'CodingAcademy', companyHeadcount: '11-50', yearsOfExperience: 8, skills: ['Teaching', 'JavaScript', 'Python'] },
+  { id: '48', name: 'Paul Smith', title: 'LMS Administrator', seniority: 'Mid-Level', location: 'Sydney', industry: 'Education', company: 'UniOnline', companyHeadcount: '501-1000', yearsOfExperience: 5, skills: ['LMS', 'Moodle', 'IT Support'] },
+
+  // Manufacturing & IoT
+  { id: '49', name: 'Carlos Rodriguez', title: 'IoT Engineer', seniority: 'Senior', location: 'Munich', industry: 'Manufacturing', company: 'AutoTech DE', companyHeadcount: '1001-5000', yearsOfExperience: 7, skills: ['IoT', 'Embedded Systems', 'C++'] },
+  { id: '50', name: 'Hans Mueller', title: 'Operations Director', seniority: 'Director', location: 'Berlin', industry: 'Manufacturing', company: 'PrecisionParts', companyHeadcount: '201-500', yearsOfExperience: 15, skills: ['Operations', 'Lean Manufacturing', 'Six Sigma'] },
+
+  // More Technology Roles
+  { id: '51', name: 'Grace Hopper', title: 'Distinguished Engineer', seniority: 'VP', location: 'New York', industry: 'Technology', company: 'LegacySystems', companyHeadcount: '5001+', yearsOfExperience: 30, skills: ['COBOL', 'System Architecture', 'Leadership'] },
+  { id: '52', name: 'Ada Lovelace', title: 'Algorithmic Trader', seniority: 'Senior', location: 'London', industry: 'Technology', company: 'Numera', companyHeadcount: '11-50', yearsOfExperience: 5, skills: ['Mathematics', 'Algorithms', 'Python'] },
+  { id: '53', name: 'Linus Torvalds', title: 'Principal Engineer', seniority: 'Fellow', location: 'Helsinki', industry: 'Technology', company: 'OpenSource Found', companyHeadcount: '51-200', yearsOfExperience: 25, skills: ['C', 'Linux', 'Git'] },
+  { id: '54', name: 'Satya N', title: 'Cloud Architect', seniority: 'Senior', location: 'Seattle', industry: 'Technology', company: 'CloudServices', companyHeadcount: '5001+', yearsOfExperience: 12, skills: ['Azure', 'Cloud Architecture', 'Retailing'] },
+  { id: '55', name: 'Sheryl S', title: 'COO', seniority: 'C-Level', location: 'Menlo Park', industry: 'Technology', company: 'ConnectWorld', companyHeadcount: '5001+', yearsOfExperience: 20, skills: ['Operations', 'Strategy', 'Leadership'] },
+
+  // Consultants & Freelancers
+  { id: '56', name: 'Jack Ma', title: 'Business Consultant', seniority: 'Director', location: 'Hangzhou', industry: 'Consulting', company: 'Dragon Group', companyHeadcount: '1001-5000', yearsOfExperience: 20, skills: ['Business Strategy', 'E-commerce', 'Leadership'] },
+  { id: '57', name: 'Elon M', title: 'Product Architect', seniority: 'C-Level', location: 'Austin', industry: 'Automotive', company: 'ElectricFuture', companyHeadcount: '5001+', yearsOfExperience: 20, skills: ['Product Design', 'Engineering', 'Innovation'] },
+
+  // New York Finance
+  { id: '58', name: 'Jordan Belfort', title: 'Sales Director', seniority: 'Director', location: 'New York', industry: 'Finance', company: 'Stratton Oak', companyHeadcount: '201-500', yearsOfExperience: 10, skills: ['Sales', 'Persuasion', 'Finance'] },
+  { id: '59', name: 'Gordon Gekko', title: 'Portfolio Manager', seniority: 'Senior', location: 'New York', industry: 'Finance', company: 'BlueStar', companyHeadcount: '51-200', yearsOfExperience: 15, skills: ['Investment', 'Stocks', 'M&A'] },
+
+  // Singapore Govt/Public
+  { id: '60', name: 'Tan Ah Kow', title: 'Digital Officer', seniority: 'Manager', location: 'Singapore', industry: 'Public Sector', company: 'SmartNation SG', companyHeadcount: '1001-5000', yearsOfExperience: 8, skills: ['Digital Transformation', 'Policy', 'Tech'] },
+  
+  // More Singapore Tech
+  { id: '61', name: 'Lim Mei Ling', title: 'QA Lead', seniority: 'Senior', location: 'Singapore', industry: 'Technology', company: 'SeaGroup', companyHeadcount: '1001-5000', yearsOfExperience: 7, skills: ['QA Automation', 'Selenium', 'Java'] },
+  { id: '62', name: 'Ravi Kumar', title: 'SRE', seniority: 'Senior', location: 'Singapore', industry: 'Technology', company: 'GrabTech', companyHeadcount: '1001-5000', yearsOfExperience: 6, skills: ['SRE', 'Go', 'Kubernetes'] },
+  { id: '63', name: 'Alice Wong', title: 'HR Manager', seniority: 'Manager', location: 'Singapore', industry: 'Technology', company: 'LazadaTech', companyHeadcount: '1001-5000', yearsOfExperience: 9, skills: ['HR', 'Recruiting', 'People Ops'] },
+
+  // Tokyo Tech
+  { id: '64', name: 'Hiroshi Sato', title: 'Game Developer', seniority: 'Senior', location: 'Tokyo', industry: 'Entertainment', company: 'NintendoGame', companyHeadcount: '1001-5000', yearsOfExperience: 8, skills: ['C++', 'Game Design', 'Unity'] },
+  { id: '65', name: 'Akira Toriyama', title: 'Art Director', seniority: 'Director', location: 'Tokyo', industry: 'Entertainment', company: 'MangaStudio', companyHeadcount: '51-200', yearsOfExperience: 20, skills: ['Art Direction', 'Design', 'Creative'] },
+
+  // Legal
+  { id: '66', name: 'Saul Goodman', title: 'Legal Counsel', seniority: 'Senior', location: 'Albuquerque', industry: 'Legal', company: 'Goodman Law', companyHeadcount: '1-10', yearsOfExperience: 15, skills: ['Law', 'Negotiation', 'Defense'] },
+  { id: '67', name: 'Kim Wexler', title: 'Partner', seniority: 'C-Level', location: 'Albuquerque', industry: 'Legal', company: 'S&C Law', companyHeadcount: '51-200', yearsOfExperience: 12, skills: ['Corporate Law', 'Banking', 'Litigation'] },
+
+  // Hospitality
+  { id: '68', name: 'Gordon Ramsay', title: 'Executive Chef', seniority: 'C-Level', location: 'London', industry: 'Hospitality', company: 'HellsKitchen', companyHeadcount: '51-200', yearsOfExperience: 25, skills: ['Culinary', 'Management', 'Training'] },
+  { id: '69', name: 'Anthony B', title: 'Food Critic', seniority: 'Senior', location: 'New York', industry: 'Media', company: 'TravelFood', companyHeadcount: '201-500', yearsOfExperience: 20, skills: ['Writing', 'Food', 'Travel'] },
+
+  // Real Estate
+  { id: '70', name: 'Donald T', title: 'Developer', seniority: 'C-Level', location: 'New York', industry: 'Real Estate', company: 'TrumpOrg', companyHeadcount: '501-1000', yearsOfExperience: 30, skills: ['Development', 'Real Estate', 'Branding'] },
+
+  // More Engineers
+  { id: '71', name: 'Gavin Belson', title: 'CEO', seniority: 'C-Level', location: 'San Francisco', industry: 'Technology', company: 'Hooli', companyHeadcount: '5001+', yearsOfExperience: 15, skills: ['Leadership', 'Strategy', 'Acquisitions'] },
+  { id: '72', name: 'Richard Hendricks', title: 'CTO', seniority: 'C-Level', location: 'San Francisco', industry: 'Technology', company: 'PiedPiper', companyHeadcount: '11-50', yearsOfExperience: 8, skills: ['Compression', 'Algorithm', 'C++'] },
+  { id: '73', name: 'Dinesh C', title: 'Senior Engineer', seniority: 'Senior', location: 'San Francisco', industry: 'Technology', company: 'PiedPiper', companyHeadcount: '11-50', yearsOfExperience: 6, skills: ['Java', 'Scala', 'Tesla'] },
+  { id: '74', name: 'Bertram Gilfoyle', title: 'Systems Architect', seniority: 'Senior', location: 'San Francisco', industry: 'Technology', company: 'PiedPiper', companyHeadcount: '11-50', yearsOfExperience: 7, skills: ['Security', 'Server Architecture', 'Hardware'] },
+  { id: '75', name: 'Jared Dunn', title: 'COO', seniority: 'C-Level', location: 'San Francisco', industry: 'Technology', company: 'PiedPiper', companyHeadcount: '11-50', yearsOfExperience: 8, skills: ['Business Development', 'Management', 'Support'] },
 ];
 
 export const mockCompanies: Company[] = [
@@ -89,4 +164,39 @@ export const mockCompanies: Company[] = [
   { id: 'c8', name: 'NeoBank UK', industry: 'Finance', location: 'London', headcount: '201-500', type: 'Startup' },
   { id: 'c9', name: 'AI Labs Japan', industry: 'Technology', location: 'Tokyo', headcount: '51-200', type: 'Startup' },
   { id: 'c10', name: 'TechBerlin GmbH', industry: 'Technology', location: 'Berlin', headcount: '51-200', type: 'Startup' },
+  
+  // Healthcare
+  { id: 'c11', name: 'HealthStart SG', industry: 'Healthcare', location: 'Singapore', headcount: '51-200', type: 'SME' },
+  { id: 'c12', name: 'HealthTech Solutions', industry: 'Healthcare', location: 'San Francisco', headcount: '11-50', type: 'Startup' },
+  { id: 'c13', name: 'BioGen UK', industry: 'Healthcare', location: 'London', headcount: '501-1000', type: 'Enterprise' },
+  { id: 'c14', name: 'MedCare App', industry: 'Healthcare', location: 'Singapore', headcount: '11-50', type: 'Startup' },
+  
+  // Finance
+  { id: 'c15', name: 'GlobalBank Corp', industry: 'Finance', location: 'New York', headcount: '5001+', type: 'Enterprise' },
+  { id: 'c16', name: 'QuantTrade Asia', industry: 'Finance', location: 'Singapore', headcount: '51-200', type: 'SME' },
+  { id: 'c17', name: 'HedgeFund X', industry: 'Finance', location: 'New York', headcount: '51-200', type: 'SME' },
+  
+  // Retail & Fashion
+  { id: 'c18', name: 'FashionForward', industry: 'Retail', location: 'London', headcount: '201-500', type: 'SME' },
+  { id: 'c19', name: 'GlobalGoods', industry: 'Retail', location: 'Seoul', headcount: '1001-5000', type: 'Enterprise' },
+  { id: 'c20', name: 'ShopEasy ES', industry: 'Retail', location: 'Barcelona', headcount: '51-200', type: 'SME' },
+  
+  // Education
+  { id: 'c21', name: 'EduTech Global', industry: 'Education', location: 'London', headcount: '201-500', type: 'SME' },
+  
+  // Auto & Manufacturing
+  { id: 'c22', name: 'AutoTech DE', industry: 'Manufacturing', location: 'Munich', headcount: '1001-5000', type: 'Enterprise' },
+  { id: 'c23', name: 'PrecisionParts', industry: 'Manufacturing', location: 'Berlin', headcount: '201-500', type: 'SME' },
+  { id: 'c24', name: 'ElectricFuture', industry: 'Automotive', location: 'Austin', headcount: '5001+', type: 'Enterprise' },
+  
+  // Big Tech
+  { id: 'c25', name: 'LegacySystems', industry: 'Technology', location: 'New York', headcount: '5001+', type: 'Enterprise' },
+  { id: 'c26', name: 'CloudServices', industry: 'Technology', location: 'Seattle', headcount: '5001+', type: 'Enterprise' },
+  { id: 'c27', name: 'ConnectWorld', industry: 'Technology', location: 'Menlo Park', headcount: '5001+', type: 'Enterprise' },
+  { id: 'c28', name: 'Google', industry: 'Technology', location: 'Mountain View', headcount: '5001+', type: 'Enterprise' },
+  { id: 'c29', name: 'Meta', industry: 'Technology', location: 'Menlo Park', headcount: '5001+', type: 'Enterprise' },
+  
+  // Silicon Valley Fictional
+  { id: 'c30', name: 'PiedPiper', industry: 'Technology', location: 'San Francisco', headcount: '11-50', type: 'Startup' },
+  { id: 'c31', name: 'Hooli', industry: 'Technology', location: 'San Francisco', headcount: '5001+', type: 'Enterprise' },
 ];

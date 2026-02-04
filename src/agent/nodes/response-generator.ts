@@ -3,6 +3,41 @@ import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { AgentStateType } from '../state';
 import { RESPONSE_GENERATION_SYSTEM_PROMPT } from '@/prompts';
 import { SearchFilters, ConfidenceType } from '@/types';
+import { search, formatSearchResults, SimpleSearchFilters } from '@/lib/search-service';
+
+// Convert agent filters to search service format
+function convertFiltersForSearch(filters: SearchFilters): SimpleSearchFilters {
+  const result: SimpleSearchFilters = {};
+  
+  if (filters.titles?.value) {
+    result.jobTitle = Array.isArray(filters.titles.value) ? filters.titles.value : [filters.titles.value];
+  }
+  if (filters.locations?.value) {
+    result.location = Array.isArray(filters.locations.value) ? filters.locations.value : [filters.locations.value];
+  }
+  if (filters.industries?.value) {
+    result.industry = Array.isArray(filters.industries.value) ? filters.industries.value : [filters.industries.value];
+  }
+  if (filters.seniorities?.value) {
+    result.seniority = Array.isArray(filters.seniorities.value) ? filters.seniorities.value : [filters.seniorities.value];
+  }
+  if (filters.companyHeadcount?.value) {
+    result.companyHeadcount = filters.companyHeadcount.value;
+  }
+  if (filters.yearsOfExperience?.value) {
+    const exp = filters.yearsOfExperience.value;
+    if (typeof exp === 'object' && 'min' in exp) {
+      result.yearsOfExperience = `${exp.min}+`;
+    } else {
+      result.yearsOfExperience = String(exp);
+    }
+  }
+  if (filters.companies?.value) {
+    result.companyName = Array.isArray(filters.companies.value) ? filters.companies.value[0] : filters.companies.value;
+  }
+  
+  return result;
+}
 
 export async function generateResponse(
   state: AgentStateType,
@@ -14,7 +49,33 @@ export async function generateResponse(
   const intent = state.intent;
   const userInput = state.userInput;
   
-  // Build context for response generation
+  // Check if user is confirming to execute search
+  // Execute search if:
+  // 1. Intent is 'confirm' (user explicitly confirmed)
+  // 2. OR user input contains confirmation words AND we have some filters
+  const hasFilters = Object.keys(filters).some(k => filters[k as keyof SearchFilters]?.value);
+  const isConfirm = intent?.type === 'confirm';
+  const hasConfirmWords = ['yes', 'please', 'ok', 'sure', 'go', 'search', 'find', 'proceed', 
+                           '是', '好', '可以', '搜索', '开始', '执行', '查找', '确认']
+                          .some(word => userInput.toLowerCase().trim().includes(word));
+  
+  const shouldExecuteSearch = hasFilters && (isConfirm || (hasConfirmWords && !needsClarification));
+  
+  // If user confirms search, execute and return results
+  if (shouldExecuteSearch) {
+    const searchFilters = convertFiltersForSearch(filters);
+    console.log('[Search] Executing search with filters:', JSON.stringify(searchFilters));
+    const results = search(searchFilters);
+    const formattedResults = formatSearchResults(results);
+    
+    return {
+      response: `🔍 **搜索完成！**\n\n${formattedResults}`,
+      // Mark search as executed to prevent loop
+      searchExecuted: true,
+    };
+  }
+  
+  // Otherwise, build context for LLM response
   const context = buildResponseContext(filters, meta, needsClarification, intent, userInput);
   
   try {

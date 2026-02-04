@@ -7,10 +7,11 @@ export async function getCheckpointer(): Promise<PostgresSaver> {
     return checkpointer;
   }
 
-  const connectionString = process.env.POSTGRES_URL;
+  // Use DIRECT_URL for direct connection (not pooler) to avoid connection issues
+  const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL;
   
   if (!connectionString) {
-    throw new Error('POSTGRES_URL environment variable is not set');
+    throw new Error('DATABASE_URL or DIRECT_URL environment variable is not set');
   }
 
   // Create PostgresSaver from connection string
@@ -19,7 +20,7 @@ export async function getCheckpointer(): Promise<PostgresSaver> {
   // Setup the checkpointer tables (creates tables if not exist)
   await checkpointer.setup();
   
-  console.log('[Checkpointer] PostgreSQL checkpointer initialized');
+  console.log('[Checkpointer] PostgreSQL (Supabase) checkpointer initialized');
   
   return checkpointer;
 }

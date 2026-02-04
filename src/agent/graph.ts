@@ -170,7 +170,7 @@ async function getCompiledAgent() {
     const graph = createSearchAgent();
     const checkpointer = await getCheckpointer();
     compiledAgent = graph.compile({ checkpointer });
-    console.log('[Agent] Graph compiled with PostgreSQL checkpointer');
+    console.log('[Agent] Graph compiled with PostgreSQL (Supabase) checkpointer');
   }
   return compiledAgent;
 }
@@ -232,6 +232,7 @@ export async function* runAgentWithStreaming(
     
     let finalState: AgentStateType | null = null;
     let currentNode: string | null = null;  // Track current executing node
+    let hasStreamedContent = false;  // Track if content has been streamed via LLM
     
     for await (const event of eventStream) {
       // Track node execution
@@ -249,6 +250,25 @@ export async function* runAgentWithStreaming(
       }
       
       if (event.event === 'on_chain_end' && event.name && Object.values(NODE_NAMES).includes(event.name as typeof NODE_NAMES[keyof typeof NODE_NAMES])) {
+        // If generate_response completed and has a direct response (not streamed via LLM)
+        // This happens when search results are returned directly
+        if (event.name === NODE_NAMES.GENERATE_RESPONSE && 
+            event.data?.output?.response && 
+            !hasStreamedContent) {
+          const directResponse = event.data.output.response as string;
+          // Only send if it's not JSON (actual response text)
+          if (directResponse && !directResponse.startsWith('{')) {
+            yield {
+              type: 'content',
+              data: {
+                chunk: directResponse,
+                isComplete: true,
+              },
+              timestamp: Date.now(),
+            };
+          }
+        }
+        
         yield {
           type: 'progress',
           data: {
@@ -267,6 +287,7 @@ export async function* runAgentWithStreaming(
           event.data?.chunk?.content) {
         const content = event.data.chunk.content as string;
         if (content) {
+          hasStreamedContent = true;  // Mark that we've streamed content
           yield {
             type: 'content',
             data: {

@@ -1,5 +1,15 @@
 import { mockPeople, mockCompanies, Person, Company } from '@/data/mock-data';
-import type { SearchFilters } from '@/types';
+
+// Simple search filters (flat structure for easy matching)
+export interface SimpleSearchFilters {
+  jobTitle?: string | string[];
+  location?: string | string[];
+  industry?: string | string[];
+  seniority?: string | string[];
+  companyHeadcount?: string | string[];
+  yearsOfExperience?: string;
+  companyName?: string;
+}
 
 export interface SearchResult {
   people: Person[];
@@ -26,34 +36,29 @@ function matchesFilter(value: string, filter: string | string[] | undefined): bo
   return normalizedValue.includes(normalizeString(filter));
 }
 
-function matchesHeadcount(personHeadcount: string, filterHeadcount: string | undefined): boolean {
-  if (!filterHeadcount) return true;
-  
-  // Map filter values to ranges
-  const headcountRanges: Record<string, number[]> = {
-    '1-10': [1, 10],
-    '11-50': [11, 50],
-    '51-200': [51, 200],
-    '201-500': [201, 500],
-    '501-1000': [501, 1000],
-    '1001-5000': [1001, 5000],
-    '5001+': [5001, Infinity],
-  };
-  
-  const filterLower = normalizeString(filterHeadcount);
-  
-  // Check for "startup" or "small company" keywords
-  if (filterLower.includes('startup') || filterLower.includes('small')) {
-    return ['1-10', '11-50', '51-200'].includes(personHeadcount);
+function matchesHeadcount(personHeadcount: string, filterHeadcount: string | string[] | undefined): boolean {
+  if (!filterHeadcount || (Array.isArray(filterHeadcount) && filterHeadcount.length === 0)) {
+    return true;
   }
   
-  // Check for "large" or "enterprise" keywords
-  if (filterLower.includes('large') || filterLower.includes('enterprise')) {
-    return ['501-1000', '1001-5000', '5001+'].includes(personHeadcount);
-  }
+  const filters = Array.isArray(filterHeadcount) ? filterHeadcount : [filterHeadcount];
   
-  // Direct match
-  return normalizeString(personHeadcount).includes(filterLower);
+  return filters.some(filter => {
+    const filterLower = normalizeString(filter);
+    
+    // Check for "startup" or "small company" keywords
+    if (filterLower.includes('startup') || filterLower.includes('small')) {
+      return ['1-10', '11-50', '51-200'].includes(personHeadcount);
+    }
+    
+    // Check for "large" or "enterprise" keywords
+    if (filterLower.includes('large') || filterLower.includes('enterprise')) {
+      return ['501-1000', '1001-5000', '5001+'].includes(personHeadcount);
+    }
+    
+    // Direct match
+    return normalizeString(personHeadcount).includes(filterLower);
+  });
 }
 
 function matchesExperience(years: number, filter: string | undefined): boolean {
@@ -81,7 +86,7 @@ function matchesExperience(years: number, filter: string | undefined): boolean {
   return true;
 }
 
-export function searchPeople(filters: SearchFilters): Person[] {
+export function searchPeople(filters: SimpleSearchFilters): Person[] {
   return mockPeople.filter(person => {
     // Match job title
     if (!matchesFilter(person.title, filters.jobTitle)) {
@@ -122,7 +127,7 @@ export function searchPeople(filters: SearchFilters): Person[] {
   });
 }
 
-export function searchCompanies(filters: SearchFilters): Company[] {
+export function searchCompanies(filters: SimpleSearchFilters): Company[] {
   return mockCompanies.filter(company => {
     // Match industry
     if (!matchesFilter(company.industry, filters.industry)) {
@@ -148,7 +153,7 @@ export function searchCompanies(filters: SearchFilters): Company[] {
   });
 }
 
-export function search(filters: SearchFilters): SearchResult {
+export function search(filters: SimpleSearchFilters): SearchResult {
   const people = searchPeople(filters);
   const companies = searchCompanies(filters);
   

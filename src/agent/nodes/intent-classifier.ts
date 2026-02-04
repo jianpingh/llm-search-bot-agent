@@ -4,6 +4,20 @@ import { AgentStateType } from '../state';
 import { INTENT_CLASSIFICATION_SYSTEM_PROMPT } from '@/prompts';
 import { IntentType } from '@/types';
 
+// Simple confirmation words that should trigger search execution
+const CONFIRM_WORDS = ['yes', 'yeah', 'yep', 'sure', 'ok', 'okay', 'please', 'go', 'proceed', 'search', 'find',
+                       '是', '好', '好的', '可以', '行', '确认', '搜索', '开始', '执行', '查找'];
+
+// Check if user input is a simple confirmation
+function isSimpleConfirmation(input: string): boolean {
+  const normalized = input.toLowerCase().trim();
+  // Check if input is just a confirmation word (with possible punctuation)
+  return CONFIRM_WORDS.some(word => {
+    const pattern = new RegExp(`^${word}[!.?]*$`, 'i');
+    return pattern.test(normalized) || normalized === word;
+  });
+}
+
 export async function classifyIntent(
   state: AgentStateType,
   llm: ChatOpenAI
@@ -11,6 +25,19 @@ export async function classifyIntent(
   const userInput = state.userInput;
   const currentFilters = state.currentFilters;
   const previousContext = state.previousContext;
+  
+  // Quick check: if user input is a simple confirmation and we have filters, return confirm intent directly
+  const hasFilters = Object.keys(currentFilters).some(k => currentFilters[k as keyof typeof currentFilters]?.value);
+  if (hasFilters && isSimpleConfirmation(userInput)) {
+    console.log('[Intent] Detected simple confirmation, returning confirm intent');
+    return {
+      intent: {
+        type: 'confirm' as IntentType,
+        confidence: 0.95,
+        reasoning: 'User provided a simple confirmation word',
+      },
+    };
+  }
   
   // Build context string
   let contextStr = '';
