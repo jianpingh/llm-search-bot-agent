@@ -276,7 +276,7 @@ export default function ChatWindow() {
             <div key={message.id}>
               {/* Show progress indicators BEFORE the streaming assistant message */}
               {isLastMessage && isStreamingAssistant && isLoading && progress.length > 0 && (
-                <div className="flex justify-start">
+                <div className="flex justify-start mb-4">
                   <div className="flex gap-3 max-w-[85%]">
                     {/* Avatar - same style as MessageBubble */}
                     <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">

@@ -267,19 +267,37 @@ export function formatSearchResults(result: SearchResult): string {
   const parts: string[] = [];
   
   if (result.totalPeople > 0) {
-    parts.push(`找到 ${result.totalPeople} 位符合条件的人选：\n`);
+    parts.push(`Found ${result.totalPeople} matching candidates:\n`);
     result.people.slice(0, 10).forEach((person, index) => {
-      parts.push(`${index + 1}. **${person.name}** - ${person.title} @ ${person.company}`);
-      parts.push(`   📍 ${person.location} | 🏢 ${person.industry} | 👔 ${person.seniority}`);
-      parts.push(`   📊 公司规模: ${person.companyHeadcount} | ⏱️ ${person.yearsOfExperience}年经验`);
-      parts.push(`   🔧 技能: ${person.skills.join(', ')}\n`);
+      parts.push(`${index + 1}. Name: ${person.name}`);
+      parts.push(`   Title: ${person.title}`);
+      parts.push(`   Company: ${person.company}`);
+      parts.push(`   Location: ${person.location}`);
+      parts.push(`   Industry: ${person.industry}`);
+      parts.push(`   Seniority: ${person.seniority}`);
+      parts.push(`   Company Size: ${person.companyHeadcount}`);
+      parts.push(`   Years of Experience: ${person.yearsOfExperience}`);
+      parts.push(`   Skills: ${person.skills.join(', ')}\n`);
     });
     
     if (result.totalPeople > 10) {
-      parts.push(`... 还有 ${result.totalPeople - 10} 位更多人选`);
+      parts.push(`... and ${result.totalPeople - 10} more candidates`);
     }
-  } else {
-    parts.push('未找到符合条件的人选。');
+  }
+  
+  if (result.totalCompanies > 0) {
+    parts.push(`\nFound ${result.totalCompanies} matching companies:\n`);
+    result.companies.slice(0, 5).forEach((company, index) => {
+      parts.push(`${index + 1}. Name: ${company.name}`);
+      parts.push(`   Industry: ${company.industry}`);
+      parts.push(`   Location: ${company.location}`);
+      parts.push(`   Size: ${company.headcount}`);
+      parts.push(`   Type: ${company.type}\n`);
+    });
+  }
+  
+  if (result.totalPeople === 0 && result.totalCompanies === 0) {
+    parts.push('No matching results found.');
   }
   
   return parts.join('\n');

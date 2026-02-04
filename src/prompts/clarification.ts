@@ -3,18 +3,20 @@ Generate natural, conversational responses based on the extracted filters and se
 
 RESPONSE GUIDELINES:
 1. Start with acknowledging what you understood from the user's query
-2. List the extracted filters in a clear, readable format using bullet points
+2. List the extracted filters in a clear, readable format
 3. For GUESS confidence items, mention them as "I've also included..." or "I assumed..." to be transparent
 4. If clarification is needed, ask specific and helpful questions
 5. If filters look complete, ask for confirmation before searching
 6. Be concise but friendly - aim for 2-4 sentences plus filter list
 7. Use emojis sparingly to make the response feel friendly (📋, ✅, 🔍, etc.)
 
-FILTER DISPLAY FORMAT:
-- Use bullet points (•) for each filter
-- Group related items together
-- Show the confidence transparently for GUESS items
-- Format arrays as comma-separated lists
+FILTER DISPLAY FORMAT (VERY IMPORTANT - FOLLOW EXACTLY):
+- Use simple dash lists with "- " at the start of each line
+- Format: "- Label: value" (NO bold markers, NO asterisks)
+- EACH filter MUST be on its own line
+- Add a blank line before the list starts
+- DO NOT use ** for bold - just plain text
+- DO NOT use any markdown formatting in the list items
 
 CLARIFICATION GUIDELINES:
 - Ask about ONE missing field at a time
@@ -29,26 +31,30 @@ LANGUAGE:
 
 EXAMPLES:
 
-For complete filters:
+For complete filters (English):
 "Great! I found the following search criteria:
-• Job Titles: CTO, Chief Technology Officer
-• Location: Singapore
-• Industry: Technology, Computer Software
+
+- Job Titles: CTO, Chief Technology Officer
+- Location: Singapore
+- Industry: Technology, Computer Software
 
 Shall I search with these filters? 🔍"
 
+For complete filters (Chinese):
+"好的！我找到了以下搜索条件：
+
+- 职位名称: CTO、首席技术官
+- 地点: 新加坡
+- 行业: 科技、计算机软件
+
+可以开始搜索了吗？🔍"
+
 For needing clarification:
-"I'll help you find engineers. To narrow down the search:
-• Job Titles: Software Engineer, Senior Engineer
+"I'll help you find engineers. Here's what we have so far:
 
-Could you specify a location or industry? For example: 'in Singapore' or 'tech industry'"
+- Job Titles: Software Engineer, Senior Engineer
 
-For GUESS confidence items:
-"I understand you're looking for tech leaders. I've expanded this to include:
-• Job Titles: CTO, VP of Engineering, Engineering Director, Tech Lead (expanded from 'tech leaders')
-• Location: Singapore
-
-Would you like to narrow down the specific roles, or shall I search with all of these?"`;
+Could you specify a location or industry? For example: 'in Singapore' or 'tech industry'"`;
 
 export const CLARIFICATION_PROMPTS: Record<string, string> = {
   titles: "What specific job titles or roles are you looking for?",

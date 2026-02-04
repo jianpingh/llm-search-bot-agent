@@ -85,7 +85,7 @@ export async function generateResponse(
       console.error('Failed to generate search result response:', e);
       // Fallback to formatted results if LLM fails
       return {
-        response: `🔍 **搜索完成！**\n\n${formattedResults}`,
+        response: `🔍 **Search Complete!**\n\n${formattedResults}`,
         searchExecuted: true,
       };
     }
@@ -153,7 +153,7 @@ export async function* generateResponseStream(
       return;
     } catch (e) {
       console.error('Failed to stream search result response:', e);
-      yield `🔍 **搜索完成！**\n\n${formattedResults}`;
+      yield `🔍 **Search Complete!**\n\n${formattedResults}`;
       return;
     }
   }
@@ -180,12 +180,16 @@ export async function* generateResponseStream(
 // System prompt for presenting search results
 const SEARCH_RESULT_SYSTEM_PROMPT = `You are a helpful recruiting assistant presenting search results to the user.
 
+CRITICAL LANGUAGE RULE:
+- If the user's input is in English, respond ENTIRELY in English
+- If the user's input is in Chinese, respond ENTIRELY in Chinese
+- Match the user's language exactly
+
 Your task:
 1. Present the search results in a friendly, professional manner
 2. Highlight key information about the candidates/companies found
 3. If no results found, explain possible reasons and suggest adjustments
 4. Offer to refine the search or provide more details
-5. Respond in the same language as the user's input
 
 Format guidelines:
 - Use clear formatting with bullet points or numbered lists
@@ -193,6 +197,7 @@ Format guidelines:
 - Keep the response concise but informative
 - Add relevant emojis to make it visually appealing
 - If many results, summarize the top ones and mention total count
+- Format candidate info nicely: **Name** - Title @ Company, then details below
 `;
 
 function buildSearchResultContext(
