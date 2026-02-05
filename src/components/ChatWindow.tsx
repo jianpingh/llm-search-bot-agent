@@ -30,11 +30,49 @@ export default function ChatWindow() {
   const [currentFilters, setCurrentFilters] = useState<SearchFilters | null>(null);
   const [currentMeta, setCurrentMeta] = useState<SearchMeta | null>(null);
   const [progress, setProgress] = useState<ProgressItem[]>([]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loadingSession, setLoadingSession] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Load first session on mount
+  useEffect(() => {
+    const loadFirstSession = async () => {
+      try {
+        const response = await fetch('/api/sessions');
+        const data = await response.json();
+        
+        if (data.success && data.sessions && data.sessions.length > 0) {
+          // Load the first (most recent) session
+          const firstSessionId = data.sessions[0].sessionId;
+          const sessionResponse = await fetch(`/api/sessions/${firstSessionId}`);
+          const sessionData = await sessionResponse.json();
+          
+          if (sessionData.success && sessionData.session) {
+            const loadedMessages: Message[] = sessionData.session.messages.map(
+              (msg: { role: string; content: string }, index: number) => ({
+                id: `${msg.role}-${index}-${Date.now()}`,
+                role: msg.role as 'user' | 'assistant',
+                content: msg.content,
+                isStreaming: false,
+              })
+            );
+            
+            setMessages(loadedMessages);
+            setSessionId(firstSessionId);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load initial session:', error);
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+    
+    loadFirstSession();
+  }, []);
   
   // Scroll to bottom of messages
   const scrollToBottom = useCallback(() => {
@@ -300,11 +338,11 @@ export default function ChatWindow() {
         </header>
 
         {/* Loading Session Overlay */}
-        {loadingSession && (
+        {(loadingSession || initialLoading) && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/80">
             <div className="flex flex-col items-center gap-3">
               <div className="w-8 h-8 border-gray-300 rounded-full border-3 border-t-gray-600 animate-spin"></div>
-              <p className="text-gray-600">Loading conversation...</p>
+              <p className="text-gray-600">{initialLoading ? 'Loading...' : 'Loading conversation...'}</p>
             </div>
           </div>
         )}
@@ -312,7 +350,7 @@ export default function ChatWindow() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto bg-white">
         <div className="max-w-3xl px-4 py-6 mx-auto">
-          {messages.length === 0 && (
+          {!initialLoading && messages.length === 0 && (
             <div className="mt-16 space-y-6 text-center text-gray-500">
               <div className="text-6xl">👋</div>
               <div>
