@@ -117,18 +117,18 @@ export async function getSession(sessionId: string, updateLastActive: boolean = 
   return session;
 }
 
-// Save session (full update)
+// Save session (full update - but preserves messages in database)
 export async function saveSession(session: SessionData): Promise<void> {
   await ensureDbInitialized();
   
+  // Don't overwrite messages - they are managed separately by addMessageToSession
   const sql = `
     UPDATE chat_sessions SET
       last_active_at = NOW(),
       filters = $2,
       meta = $3,
       previous_context = $4,
-      skip_fields = $5,
-      messages = $6
+      skip_fields = $5
     WHERE session_id = $1
   `;
   
@@ -138,7 +138,6 @@ export async function saveSession(session: SessionData): Promise<void> {
     JSON.stringify(session.meta),
     session.previousContext ? JSON.stringify(session.previousContext) : null,
     JSON.stringify(session.skipFields),
-    JSON.stringify(session.messages),
   ]);
 }
 

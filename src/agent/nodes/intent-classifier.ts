@@ -56,6 +56,35 @@ function isSimpleRefineValue(input: string): boolean {
   return false;
 }
 
+// Check if user explicitly wants to search for companies (cross_domain from person search)
+function isExplicitCompanySearch(input: string): boolean {
+  const normalized = input.toLowerCase().trim();
+  const companyPatterns = [
+    /find\s+(company|companies)/i,
+    /search\s+(company|companies)/i,
+    /look\s+for\s+(company|companies)/i,
+    /找公司/,
+    /搜索公司/,
+    /查找公司/,
+  ];
+  return companyPatterns.some(pattern => pattern.test(normalized));
+}
+
+// Check if user explicitly wants to search for people (cross_domain from company search)
+function isExplicitPersonSearch(input: string): boolean {
+  const normalized = input.toLowerCase().trim();
+  const personPatterns = [
+    /find\s+(people|person|candidates|employees)/i,
+    /search\s+(people|person|candidates|employees)/i,
+    /look\s+for\s+(people|person|candidates|employees)/i,
+    /找人/,
+    /搜索人/,
+    /查找人才/,
+    /查找候选人/,
+  ];
+  return personPatterns.some(pattern => pattern.test(normalized));
+}
+
 export async function classifyIntent(
   state: AgentStateType,
   llm: ChatOpenAI
@@ -63,6 +92,7 @@ export async function classifyIntent(
   const userInput = state.userInput;
   const currentFilters = state.currentFilters;
   const previousContext = state.previousContext;
+  const currentDomain = state.meta.domain;
   
   // Quick check: if user input is a simple confirmation and we have filters, return confirm intent directly
   const hasFilters = Object.keys(currentFilters).some(k => currentFilters[k as keyof typeof currentFilters]?.value);
@@ -75,6 +105,32 @@ export async function classifyIntent(
         reasoning: 'User provided a simple confirmation word',
       },
     };
+  }
+  
+  // Quick check: detect cross_domain when user explicitly wants to switch search type
+  if (hasFilters) {
+    // If currently searching people and user wants to find companies
+    if (currentDomain === 'person' && isExplicitCompanySearch(userInput)) {
+      console.log('[Intent] Detected explicit company search, returning cross_domain intent');
+      return {
+        intent: {
+          type: 'cross_domain' as IntentType,
+          confidence: 0.95,
+          reasoning: 'User explicitly wants to search for companies instead of people',
+        },
+      };
+    }
+    // If currently searching companies and user wants to find people
+    if (currentDomain === 'company' && isExplicitPersonSearch(userInput)) {
+      console.log('[Intent] Detected explicit person search, returning cross_domain intent');
+      return {
+        intent: {
+          type: 'cross_domain' as IntentType,
+          confidence: 0.95,
+          reasoning: 'User explicitly wants to search for people instead of companies',
+        },
+      };
+    }
   }
   
   // Quick check: if user input is a simple value (industry, location, size) and we have filters, it's a refine
