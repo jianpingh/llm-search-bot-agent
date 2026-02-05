@@ -84,6 +84,9 @@ export const mockPeople: Person[] = [
   { id: '34', name: 'Michael Chang', title: 'Product Manager', seniority: 'Mid-Level', location: 'Singapore', industry: 'Healthcare', company: 'MedCare App', companyHeadcount: '11-50', yearsOfExperience: 5, skills: ['Healthcare', 'Product Management', 'UX'] },
   { id: '35', name: 'Lisa Kumar', title: 'Data Scientist', seniority: 'Senior', location: 'New York', industry: 'Healthcare', company: 'PharmaAnalytica', companyHeadcount: '201-500', yearsOfExperience: 7, skills: ['Biostatistics', 'Machine Learning', 'SQL'] },
   { id: '36', name: 'Robert Wilson', title: 'VP of Engineering', seniority: 'VP', location: 'Boston', industry: 'Healthcare', company: 'MediTech Systems', companyHeadcount: '501-1000', yearsOfExperience: 18, skills: ['Engineering Management', 'Healthcare IT', 'Compliance'] },
+  // Singapore Healthcare CTOs
+  { id: '36a', name: 'Dr. David Tan', title: 'CTO', seniority: 'C-Level', location: 'Singapore', industry: 'Healthcare', company: 'MedTech Singapore', companyHeadcount: '51-200', yearsOfExperience: 14, skills: ['HealthTech', 'AI in Healthcare', 'Cloud Architecture'] },
+  { id: '36b', name: 'Rachel Ng', title: 'Chief Technology Officer', seniority: 'C-Level', location: 'Singapore', industry: 'Healthcare', company: 'BioGenomics SG', companyHeadcount: '11-50', yearsOfExperience: 11, skills: ['Genomics', 'Machine Learning', 'Data Engineering'] },
 
   // Finance & FinTech
   { id: '37', name: 'David Miller', title: 'CFO', seniority: 'C-Level', location: 'New York', industry: 'Finance', company: 'GlobalBank Corp', companyHeadcount: '5001+', yearsOfExperience: 20, skills: ['Finance', 'Strategy', 'M&A'] },

@@ -13,7 +13,7 @@ interface SessionItem {
 
 interface SessionSidebarProps {
   currentSessionId: string | null;
-  onSelectSession: (sessionId: string) => void;
+  onSelectSession: (sessionId: string, refreshSessions?: () => void) => void;
   onNewSession: () => void;
   isOpen: boolean;
   onToggle: () => void;
@@ -116,7 +116,7 @@ export default function SessionSidebar({
   const renderSessionItem = (session: SessionItem) => (
     <div
       key={session.sessionId}
-      onClick={() => onSelectSession(session.sessionId)}
+      onClick={() => onSelectSession(session.sessionId, fetchSessions)}
       onMouseEnter={() => setHoveredSession(session.sessionId)}
       onMouseLeave={() => setHoveredSession(null)}
       className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors ${

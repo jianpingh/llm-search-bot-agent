@@ -4,7 +4,7 @@ import {
   getSession, 
   deleteSession,
   createSession 
-} from '@/agent/checkpointer';
+} from '@/agent/checkpointer-db';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest) {
   try {
-    const sessions = getSessionList();
+    const sessions = await getSessionList();
     
     return NextResponse.json({
       success: true,
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = createSession();
+    const session = await createSession();
     
     return NextResponse.json({
       success: true,

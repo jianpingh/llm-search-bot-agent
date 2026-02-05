@@ -215,6 +215,10 @@ function buildResponseContext(
   // Format filters for display
   const formattedFilters = formatFiltersForContext(filters);
   
+  const domainDescription = meta.domain === 'person' 
+    ? 'PERSON - User is looking for PEOPLE/CANDIDATES (NOT companies)'
+    : 'COMPANY - User is looking for COMPANIES/ORGANIZATIONS (NOT people)';
+  
   return `
 User's original input: "${userInput}"
 Intent detected: ${intent?.type || 'unknown'} (confidence: ${intent?.confidence || 0})
@@ -222,7 +226,7 @@ Intent detected: ${intent?.type || 'unknown'} (confidence: ${intent?.confidence 
 Current search filters:
 ${formattedFilters || '(No filters extracted yet)'}
 
-Search domain: ${meta.domain}
+IMPORTANT - Search domain: ${meta.domain} (${domainDescription})
 Completeness score: ${meta.completenessScore}%
 Is new search: ${meta.isNewSearch}
 Needs clarification: ${needsClarification}
@@ -238,6 +242,7 @@ ${needsClarification
 - Format filters as bullet points
 - Mention any GUESS confidence items as assumptions
 - Respond in the same language as the user's input
+- CRITICAL: Say "find people/candidates" if domain is person, "find companies" if domain is company
 `;
 }
 

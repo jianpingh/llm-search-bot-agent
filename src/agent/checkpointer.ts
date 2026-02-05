@@ -59,10 +59,13 @@ export function createSession(): SessionData {
 }
 
 // Get session by ID
-export function getSession(sessionId: string): SessionData | undefined {
+// updateLastActive: if false, only read session without updating lastActiveAt (for viewing history)
+export function getSession(sessionId: string, updateLastActive: boolean = true): SessionData | undefined {
   const session = sessionStore.get(sessionId);
   if (session) {
-    session.lastActiveAt = new Date();
+    if (updateLastActive) {
+      session.lastActiveAt = new Date();
+    }
     return session;
   }
   return undefined;

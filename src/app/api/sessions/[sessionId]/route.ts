@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession, deleteSession } from '@/agent/checkpointer';
+import { getSession, deleteSession } from '@/agent/checkpointer-db';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -14,7 +14,8 @@ export async function GET(
 ) {
   try {
     const { sessionId } = params;
-    const session = getSession(sessionId);
+    // Pass false to not update lastActiveAt when just viewing session history
+    const session = await getSession(sessionId, false);
     
     if (!session) {
       return NextResponse.json(
@@ -53,7 +54,7 @@ export async function DELETE(
 ) {
   try {
     const { sessionId } = params;
-    const deleted = deleteSession(sessionId);
+    const deleted = await deleteSession(sessionId);
     
     if (!deleted) {
       return NextResponse.json(

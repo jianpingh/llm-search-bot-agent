@@ -79,11 +79,24 @@ Inherit relevant fields (locations, industries) from previous context if applica
           break;
       }
       
+      // Determine domain: for refine/modify, keep original domain; for new_search/cross_domain, use parsed
+      let newDomain: 'person' | 'company';
+      if (intent?.type === 'refine' || intent?.type === 'modify') {
+        // Keep the original domain when refining or modifying
+        newDomain = state.meta.domain;
+      } else if (intent?.type === 'cross_domain') {
+        // Cross-domain explicitly changes domain
+        newDomain = parsed.domain || 'person';
+      } else {
+        // New search uses parsed domain
+        newDomain = parsed.domain || 'person';
+      }
+      
       return {
         currentFilters: newFilters,
         meta: {
           ...state.meta,
-          domain: parsed.domain || 'person',
+          domain: newDomain,
           isNewSearch: intent?.type === 'new_search',
         },
       };

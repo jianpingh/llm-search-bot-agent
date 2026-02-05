@@ -226,7 +226,7 @@ export default function ChatWindow() {
   };
 
   // Load a previous session
-  const handleSelectSession = async (selectedSessionId: string) => {
+  const handleSelectSession = async (selectedSessionId: string, refreshSessions?: () => void) => {
     if (selectedSessionId === sessionId) {
       return;
     }
@@ -249,6 +249,12 @@ export default function ChatWindow() {
         setSessionId(selectedSessionId);
         setCurrentFilters(null);
         setCurrentMeta(null);
+      } else if (data.error === 'Session not found') {
+        // Session was lost (e.g., server restart), refresh the session list
+        console.warn('Session not found, refreshing session list...');
+        if (refreshSessions) {
+          refreshSessions();
+        }
       }
     } catch (error) {
       console.error('Failed to load session:', error);
@@ -279,7 +285,7 @@ export default function ChatWindow() {
                 <h1 className="text-lg font-semibold text-gray-800">LLM Search Bot Agent</h1>
                 {sessionId && (
                   <p className="text-xs text-gray-400">
-                    Session: {sessionId.slice(0, 16)}...
+                    Session: {sessionId}
                   </p>
                 )}
               </div>

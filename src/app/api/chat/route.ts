@@ -5,7 +5,7 @@ import {
   createSession, 
   saveSession,
   addMessageToSession,
-} from '@/agent/checkpointer';
+} from '@/agent/checkpointer-db';
 import { createSSEStream, SSE_HEADERS } from '@/lib/stream';
 import { SearchFilters, SearchMeta } from '@/types';
 
@@ -33,13 +33,13 @@ export async function POST(request: NextRequest) {
     }
     
     // Get or create session
-    let session = requestSessionId ? getSession(requestSessionId) : null;
+    let session = requestSessionId ? await getSession(requestSessionId) : null;
     if (!session) {
-      session = createSession();
+      session = await createSession();
     }
     
     // Add user message to session
-    addMessageToSession(session.sessionId, 'user', message.trim());
+    await addMessageToSession(session.sessionId, 'user', message.trim());
     
     // Prepare previous state for agent
     const previousState = {
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
           const filtersData = event.data as { filters: SearchFilters; meta: SearchMeta };
           currentSession.filters = filtersData.filters;
           currentSession.meta = filtersData.meta;
-          saveSession(currentSession);
+          await saveSession(currentSession);
         }
         
         yield event;
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       
       // Save assistant response to session
       if (responseContent) {
-        addMessageToSession(currentSession.sessionId, 'assistant', responseContent);
+        await addMessageToSession(currentSession.sessionId, 'assistant', responseContent);
       }
     }
     
@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    const session = getSession(sessionId);
+    const session = await getSession(sessionId);
     
     if (!session) {
       return new Response(
