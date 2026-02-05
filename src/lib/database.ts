@@ -45,6 +45,7 @@ export async function initDatabase(): Promise<void> {
       session_id VARCHAR(100) PRIMARY KEY,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
       last_active_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+      title VARCHAR(200) DEFAULT 'New conversation',
       filters JSONB DEFAULT '{}',
       meta JSONB DEFAULT '{}',
       previous_context JSONB,
@@ -54,6 +55,14 @@ export async function initDatabase(): Promise<void> {
     
     CREATE INDEX IF NOT EXISTS idx_sessions_last_active 
     ON chat_sessions(last_active_at DESC);
+    
+    -- Add title column if not exists (for migration)
+    DO $$ 
+    BEGIN 
+      IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='chat_sessions' AND column_name='title') THEN
+        ALTER TABLE chat_sessions ADD COLUMN title VARCHAR(200) DEFAULT 'New conversation';
+      END IF;
+    END $$;
   `;
   
   try {

@@ -40,12 +40,21 @@ async function initDatabase() {
         session_id VARCHAR(100) PRIMARY KEY,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         last_active_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        title VARCHAR(200) DEFAULT 'New conversation',
         filters JSONB DEFAULT '{}',
         meta JSONB DEFAULT '{}',
         previous_context JSONB,
         skip_fields JSONB DEFAULT '[]',
         messages JSONB DEFAULT '[]'
       );
+      
+      -- Add title column if not exists (for migration)
+      DO $$ 
+      BEGIN 
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='chat_sessions' AND column_name='title') THEN
+          ALTER TABLE chat_sessions ADD COLUMN title VARCHAR(200) DEFAULT 'New conversation';
+        END IF;
+      END $$;
       
       -- Index for faster queries by last_active_at
       CREATE INDEX IF NOT EXISTS idx_sessions_last_active 

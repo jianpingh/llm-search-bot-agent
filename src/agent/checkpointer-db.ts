@@ -6,6 +6,7 @@ export interface SessionData {
   sessionId: string;
   createdAt: Date;
   lastActiveAt: Date;
+  title: string;
   filters: SearchFilters;
   meta: SearchMeta;
   previousContext: { domain: 'person' | 'company'; filters: SearchFilters } | null;
@@ -38,6 +39,7 @@ function rowToSession(row: any): SessionData {
     sessionId: row.session_id,
     createdAt: new Date(row.created_at),
     lastActiveAt: new Date(row.last_active_at),
+    title: row.title || 'New conversation',
     filters: row.filters || {},
     meta: row.meta || {
       domain: 'person',
@@ -70,8 +72,8 @@ export async function createSession(): Promise<SessionData> {
   };
   
   const sql = `
-    INSERT INTO chat_sessions (session_id, created_at, last_active_at, filters, meta, previous_context, skip_fields, messages)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    INSERT INTO chat_sessions (session_id, created_at, last_active_at, title, filters, meta, previous_context, skip_fields, messages)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     RETURNING *
   `;
   
@@ -79,6 +81,7 @@ export async function createSession(): Promise<SessionData> {
     sessionId,
     now,
     now,
+    'New conversation',
     JSON.stringify({}),
     JSON.stringify(defaultMeta),
     null,
@@ -172,6 +175,33 @@ export async function addMessageToSession(
     timestamp: new Date().toISOString(),
   };
   
+  // If this is a user message, check if we need to update the title
+  if (role === 'user') {
+    // Check if session title is still default
+    const checkSql = `SELECT title, jsonb_array_length(messages) as msg_count FROM chat_sessions WHERE session_id = $1`;
+    const checkRows = await query(checkSql, [sessionId]);
+    
+    if (checkRows.length > 0) {
+      const currentTitle = checkRows[0].title;
+      const msgCount = checkRows[0].msg_count || 0;
+      
+      // Update title if it's the first user message (title is default or messages is empty)
+      if (currentTitle === 'New conversation' || msgCount === 0) {
+        const newTitle = content.substring(0, 50) + (content.length > 50 ? '...' : '');
+        const updateTitleSql = `
+          UPDATE chat_sessions SET
+            title = $2,
+            messages = messages || $3::jsonb,
+            last_active_at = NOW()
+          WHERE session_id = $1
+        `;
+        await query(updateTitleSql, [sessionId, newTitle, JSON.stringify([message])]);
+        return;
+      }
+    }
+  }
+  
+  // Default: just append message
   const sql = `
     UPDATE chat_sessions SET
       messages = messages || $2::jsonb,
@@ -283,8 +313,8 @@ export async function getSessionList(): Promise<Array<{
       session_id,
       created_at,
       last_active_at,
+      title,
       jsonb_array_length(messages) as message_count,
-      messages,
       meta
     FROM chat_sessions
     ORDER BY last_active_at DESC
@@ -293,16 +323,12 @@ export async function getSessionList(): Promise<Array<{
   const rows = await query(sql);
   
   return rows.map(row => {
-    const messages = row.messages || [];
-    const firstUserMessage = messages.find((m: any) => m.role === 'user');
-    const previewText = firstUserMessage?.content?.substring(0, 50) || 'New conversation';
-    
     return {
       sessionId: row.session_id,
       createdAt: new Date(row.created_at),
       lastActiveAt: new Date(row.last_active_at),
       messageCount: row.message_count || 0,
-      preview: previewText + (firstUserMessage && firstUserMessage.content?.length > 50 ? '...' : ''),
+      preview: row.title || 'New conversation',
       domain: row.meta?.domain || 'person',
     };
   });

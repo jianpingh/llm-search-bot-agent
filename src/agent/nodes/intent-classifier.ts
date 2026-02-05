@@ -8,6 +8,22 @@ import { IntentType } from '@/types';
 const CONFIRM_WORDS = ['yes', 'yeah', 'yep', 'sure', 'ok', 'okay', 'please', 'go', 'proceed', 'search', 'find',
                        '是', '好', '好的', '可以', '行', '确认', '搜索', '开始', '执行', '查找'];
 
+// Common industry values that should be treated as refine when we have existing filters
+const INDUSTRY_VALUES = ['technology', 'tech', 'finance', 'financial', 'healthcare', 'health', 'medical',
+                         'education', 'retail', 'manufacturing', 'consulting', 'real estate', 'media',
+                         'entertainment', 'telecom', 'telecommunications', 'automotive', 'energy', 'banking',
+                         '科技', '金融', '医疗', '教育', '零售', '制造', '咨询', '房地产', '媒体', '娱乐',
+                         'software', 'internet', 'it', 'fintech', 'biotech', 'saas', 'ecommerce', 'e-commerce'];
+
+// Common location values
+const LOCATION_VALUES = ['singapore', 'new york', 'london', 'san francisco', 'tokyo', 'hong kong', 'shanghai',
+                         'beijing', 'sydney', 'berlin', 'paris', 'toronto', 'boston', 'seattle', 'austin',
+                         '新加坡', '纽约', '伦敦', '旧金山', '东京', '香港', '上海', '北京', 'us', 'usa', 'uk', 'china'];
+
+// Common company size values
+const SIZE_VALUES = ['startup', 'startups', 'enterprise', 'mid-size', 'midsize', 'small', 'large', 'any',
+                     '初创', '创业', '大型', '中型', '小型'];
+
 // Check if user input is a simple confirmation
 function isSimpleConfirmation(input: string): boolean {
   const normalized = input.toLowerCase().trim();
@@ -16,6 +32,28 @@ function isSimpleConfirmation(input: string): boolean {
     const pattern = new RegExp(`^${word}[!.?]*$`, 'i');
     return pattern.test(normalized) || normalized === word;
   });
+}
+
+// Check if input is a simple value that should be treated as refine
+function isSimpleRefineValue(input: string): boolean {
+  const normalized = input.toLowerCase().trim();
+  
+  // Check if it's a simple industry value
+  if (INDUSTRY_VALUES.some(v => normalized === v || normalized === v + 's')) {
+    return true;
+  }
+  
+  // Check if it's a simple location value
+  if (LOCATION_VALUES.some(v => normalized === v)) {
+    return true;
+  }
+  
+  // Check if it's a company size value
+  if (SIZE_VALUES.some(v => normalized === v || normalized.includes(v))) {
+    return true;
+  }
+  
+  return false;
 }
 
 export async function classifyIntent(
@@ -35,6 +73,18 @@ export async function classifyIntent(
         type: 'confirm' as IntentType,
         confidence: 0.95,
         reasoning: 'User provided a simple confirmation word',
+      },
+    };
+  }
+  
+  // Quick check: if user input is a simple value (industry, location, size) and we have filters, it's a refine
+  if (hasFilters && isSimpleRefineValue(userInput)) {
+    console.log('[Intent] Detected simple refine value, returning refine intent');
+    return {
+      intent: {
+        type: 'refine' as IntentType,
+        confidence: 0.95,
+        reasoning: 'User provided a simple value to add to existing search filters',
       },
     };
   }
